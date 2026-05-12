@@ -1,0 +1,74 @@
+.container {
+  padding: 20px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.courseName {
+  font-size: 19px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  color: #006FFD;
+  margin-bottom: 15px;
+}
+
+.lessonList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.lessonCard {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.lessonInfo {
+  flex: 1;
+  margin-left: 15px;
+}
+
+.lessonTitle {
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+.lessonClock {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.clockIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.iconContainer img {
+  width: 40px;
+}
+
+.playIcon {
+  filter: invert(45%) sepia(54%) saturate(600%) hue-rotate(205deg);
+}

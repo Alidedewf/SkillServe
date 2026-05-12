@@ -1,0 +1,146 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background:linear-gradient(180deg, #006FFD 0%, #FFF 30%);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.progress {
+    font-size: 16px;
+}
+
+.timer {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.questionCard {
+    width: 100%;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin: 10px 0;
+    margin-bottom: 17%;
+}
+
+.questionImage {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 50px;
+}
+
+.questionType {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.question {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.answerLabel {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.radioInput {
+    display: none; /* Скрываем стандартное радио */
+}
+
+.customRadio {
+    width: 20px;
+    height: 17px;
+    border: 2px solid #006ffd;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.radioInput:checked + .customRadio {
+    background-color: #006ffd;
+    border-color: #006ffd;
+}
+
+.radioInput:checked + .customRadio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.selected {
+    background: #d2f7c1;
+    border-color: #5ac85a;
+}
+
+.actions {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.nextButton,
+.finishButton {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #006ffd;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.nextButton:hover,
+.finishButton:hover {
+    background: #0056b3;
+}

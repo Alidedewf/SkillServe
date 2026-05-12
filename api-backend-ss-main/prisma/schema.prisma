@@ -1,0 +1,180 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Роли пользователей ──────────────────────────────────────────────
+enum Role {
+  USER
+  ADMIN
+}
+
+// ─── Статус курса ────────────────────────────────────────────────────
+enum CourseStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// ─── Тип урока ───────────────────────────────────────────────────────
+enum LessonType {
+  VIDEO
+  TEXT
+}
+
+// ─── Статус прохождения курса ─────────────────────────────────────────
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ПОЛЬЗОВАТЕЛИ
+// ─────────────────────────────────────────────────────────────────────
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role     @default(USER)
+  avatar_url String?
+  position   String?
+  language   String   @default("ru")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Связи
+  progress     UserCourseProgress[]
+  testAttempts TestAttempt[]
+  achievements UserAchievement[]
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// КУРСЫ
+// ─────────────────────────────────────────────────────────────────────
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  category    String       @default("Сервис")
+  image_url   String?
+  language    String       @default("ru")
+  status      CourseStatus @default(ACTIVE)
+  created_at  DateTime     @default(now())
+
+  // Связи
+  lessons      Lesson[]
+  tests        Test[]
+  progress     UserCourseProgress[]
+  achievements Achievement[]
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// УРОКИ
+// ─────────────────────────────────────────────────────────────────────
+model Lesson {
+  id          Int        @id @default(autoincrement())
+  course_id   Int
+  title       String
+  type        LessonType
+  content_url String?
+  content     String?    // Для текстовых уроков
+  order       Int
+  created_at  DateTime   @default(now())
+
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ТЕСТЫ
+// ─────────────────────────────────────────────────────────────────────
+model Test {
+  id        Int    @id @default(autoincrement())
+  course_id Int
+  title     String
+  min_score Int    @default(5)
+
+  course    Course       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  questions Question[]
+  attempts  TestAttempt[]
+}
+
+model Question {
+  id        Int      @id @default(autoincrement())
+  test_id   Int
+  content   String
+  image_url String?
+
+  test    Test     @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model Answer {
+  id          Int     @id @default(autoincrement())
+  question_id Int
+  content     String
+  is_correct  Boolean @default(false)
+
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ПРОГРЕСС И РЕЗУЛЬТАТЫ
+// ─────────────────────────────────────────────────────────────────────
+model UserCourseProgress {
+  id        Int            @id @default(autoincrement())
+  user_id   Int
+  course_id Int
+  progress  Float          @default(0)
+  status    ProgressStatus @default(NOT_STARTED)
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, course_id])
+}
+
+model TestAttempt {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  test_id         Int
+  correct_count   Int
+  total_questions Int
+  created_at      DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  test Test @relation(fields: [test_id], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ДОСТИЖЕНИЯ
+// ─────────────────────────────────────────────────────────────────────
+model Achievement {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+  image_url   String?
+  course_id   Int?    // null = глобальное достижение
+
+  course Course? @relation(fields: [course_id], references: [id])
+  users  UserAchievement[]
+}
+
+model UserAchievement {
+  id             Int      @id @default(autoincrement())
+  user_id        Int
+  achievement_id Int
+  earned_at      DateTime @default(now())
+
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievement_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, achievement_id])
+}

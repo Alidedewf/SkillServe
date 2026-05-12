@@ -1,0 +1,97 @@
+/* ─── Глобальный сброс ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Типографика ──────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ─── DESKTOP: премиальный фон ──────────────────────────────── */
+  /*
+    HoReCa-тема: тёплые тёмные тона, намёк на кухню/ресторан.
+    Многослойный radial-gradient имитирует "свет прожектора" на столе.
+  */
+  background-color: #0d0d0d;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 25% 20%, rgba(180, 120, 40, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 75% 80%, rgba(0, 111, 253, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 60% 40%, rgba(255, 90, 50, 0.08) 0%, transparent 55%);
+
+  min-height: 100vh;
+
+  /* Центрирует #root по горизонтали и вертикали */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ─── Корневой контейнер приложения ────────────────────────────── */
+#root {
+  position: relative;
+  width: 100%;
+
+  /* ─── MOBILE: занимает всю ширину до брейкпоинта ─────────────── */
+  /* ─── DESKTOP: фиксируем как экран телефона ─────────────────── */
+  max-width: 450px;
+
+  min-height: 100vh;
+
+  /* Тень как у смартфона, лежащего на столе */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 40px 120px rgba(0, 0, 0, 0.5);
+
+  /* Лёгкое скругление — только на десктопе выглядит как "экран телефона" */
+  border-radius: 0;
+
+  background-color: #ffffff; /* Белый фон самого приложения */
+  overflow: hidden; /* Скрывает всё, что выходит за рамки (важно для анимаций) */
+}
+
+/* ─── Только для Desktop: скругляем углы контейнера ──────────── */
+@media (min-width: 600px) {
+  body {
+    align-items: center; /* Вертикально центрировать если контент влезает в экран */
+    padding: 40px 0;
+  }
+
+  #root {
+    border-radius: 36px;
+    min-height: calc(100vh - 80px);
+    max-height: 900px; /* Не тянуть выше типичного экрана телефона */
+    overflow-y: auto; /* Скролл внутри контейнера, а не страницы */
+  }
+
+  /* Нижний navbar прибивается к нижней части контейнера, а не viewport */
+  /* (Navbar.module.css переопределит position: fixed → sticky/absolute) */
+}
+
+/* ─── Admin Desktop Override ────────────────────────────────────────
+   Класс добавляется на body при монтировании AdminLayout.
+   Снимает ограничение max-width: 450px мобильного приложения.
+──────────────────────────────────────────────────────────────────── */
+body.admin-mode {
+  background: #f0f4ff;
+  background-image: none;
+  padding: 0;
+  display: block;
+  align-items: unset;
+  justify-content: unset;
+}
+
+body.admin-mode #root {
+  max-width: 100% !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  min-height: 100vh;
+}

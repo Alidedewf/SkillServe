@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+api-front-ss/node_modules/
+api-backend-ss-main/node_modules/
+
+# Environment variables (СЕКРЕТЫ — не пушить!)
+api-backend-ss-main/.env
+
+# Build artifacts
+api-front-ss/build/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

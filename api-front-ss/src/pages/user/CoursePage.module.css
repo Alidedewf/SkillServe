@@ -1,0 +1,168 @@
+.container {
+    background: linear-gradient(180deg, #006FFD 0%, #FFF 40%);
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 65px;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 60px;
+    margin-top: 40px;
+    margin-left: 20px;
+}
+
+.progress_span {
+    position: absolute;
+    color: #63926C;
+    font-size: 13px;
+    font-style: normal;
+    line-height: normal;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.tabButton {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #006ffd;
+    background: #f0f4ff;
+    border: 1.5px solid transparent;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+}
+
+.tabButton:hover {
+    background: #e0eaff;
+    border-color: #c0d4ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 111, 253, 0.15);
+}
+
+.tabButton:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.activeTab {
+    background: #006ffd;
+    color: #fff;
+    border-color: #006ffd;
+    box-shadow: 0 4px 16px rgba(0, 111, 253, 0.35);
+}
+
+.activeTab:hover {
+    background: #0060e0;
+    border-color: #0060e0;
+    box-shadow: 0 6px 20px rgba(0, 111, 253, 0.45);
+    transform: translateY(-1px);
+}
+
+.courseList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.courseCard {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    overflow: hidden;
+}
+
+.courseImage {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 16px;
+    margin-bottom: 25px;
+}
+
+.courseImage img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.courseDetails {
+    flex: 1;
+}
+
+.courseTitle {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.courseProgressBar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 24px;
+}
+
+.courseProgress {
+    height: 100%;
+    background: #4caf50;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.courseActionButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #006ffd;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-top: 1.5px solid #E8EAED;
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    transition: background 0.2s ease, color 0.2s ease, letter-spacing 0.2s ease;
+    letter-spacing: 0;
+}
+
+.courseActionButton:hover {
+    background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+    color: #0050cc;
+    letter-spacing: 0.3px;
+}
+
+.courseActionButton:active {
+    background: linear-gradient(135deg, #d2e3fc 0%, #b8d0f8 100%);
+    transform: scale(0.98);
+}

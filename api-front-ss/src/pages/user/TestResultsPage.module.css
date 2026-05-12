@@ -1,0 +1,132 @@
+.container {
+    min-height: 100vh;
+    padding: 16px;
+    background-color: #ffffff;
+    text-align: center;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #006FFD 0%, #FFF 30%);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .closeButton {
+    align-self: flex-start;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .header {
+    margin-bottom: 16px;
+  }
+  
+  .progressBar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 16px;
+    margin-top: 24px;
+  }
+  
+.progressText:first-child {
+    background-color: #2563eb;
+    color: white;
+    padding: 7px 33px;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.timer {
+    background-color: white; 
+    color: black;
+    padding: 7px 70px;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: center;
+}
+
+  .medal {
+    margin: 16px 0;
+  }
+  
+  .medalImage {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .subText {
+    font-size: 14px;
+    color: #6b7280;
+  }
+  
+  .statistics {
+    display: flex;
+    justify-content: space-around;
+    margin: 16px 0;
+  }
+  
+  .statItem {
+    text-align: center;
+  }
+  
+  .statItem span {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  .statItem strong {
+    font-size: 16px;
+    color: #111827;
+  }
+  
+  .questions {
+    margin-top: 16px;
+  }
+  
+  .questionCard {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+  }
+  
+  .questionCard.correct {
+    border-left: 4px solid #10b981;
+  }
+  
+  .questionCard.incorrect {
+    border-left: 4px solid #ef4444;
+  }
+  
+  .icon {
+    font-size: 20px;
+    margin-right: 8px;
+  }
+  
+  .retryButton {
+    width: 100%;
+    padding: 16px;
+    background-color: #006ffd;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: auto;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 111, 253, 0.2);
+  }
+  
+  .retryButton:hover {
+    background-color: #0056cc;
+  }
+  

@@ -1,0 +1,63 @@
+.container {
+    background: linear-gradient(180deg, #006ffd 0%, #fff 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .faqList {
+    margin-top: 20px;
+  }
+  
+  .faqItem {
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 15px;
+  }
+  
+  .question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1f2024;
+    cursor: pointer;
+  }
+  
+  .answer {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #71727a;
+  }
+  
+  .arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+  
+  .rotatedArrow {
+    transform: rotate(90deg); /* Поворот стрелки при раскрытии */
+  }
+  

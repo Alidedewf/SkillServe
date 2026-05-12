@@ -1,0 +1,136 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #006ffd 0%, #fff 10%);
+  }
+  
+  .userInfo {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .fullName {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1f2024;
+  }
+  
+  .email {
+    font-size: 14px;
+    color: #71727a;
+  }
+  
+  .settingsList {
+    margin-top: 50px;
+    margin-bottom: 65px;
+    background: #fff;
+    padding: 10px;
+  }
+  
+  .settingItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 23px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+  }
+  
+  .settingItem:last-child {
+    border-bottom: none;
+  }
+  
+  .settingItem img:first-child {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .settingItem img:last-child {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .settingItem span {
+    flex-grow: 1;
+    margin-left: 10px;
+    color: #1f2024;
+    font-size: 16px;
+  }
+  
+  .settingItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 23px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .settingItem:last-child {
+    border-bottom: none;
+  }
+  
+  .settingItem img:first-child {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .settingItem img:last-child {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+  
+  .rotatedArrow {
+    transform: rotate(90deg);
+  }
+  
+  .expandedBlock {
+    padding: 10px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .languageOption {
+    padding: 10px 0;
+    font-size: 14px;
+    color: #71727a;
+    cursor: pointer;
+  }
+  
+  .languageOption:hover {
+    color: #1f2024;
+  }
+
+  .logoutItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 23px;
+    cursor: pointer;
+    border-top: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+  }
+
+  .logoutItem:hover {
+    background-color: #fef2f2;
+  }
+
+  .logoutItem span {
+    flex-grow: 1;
+    margin-left: 10px;
+    color: #ef4444;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .iconLogout {
+    color: #ef4444;
+  }
+  

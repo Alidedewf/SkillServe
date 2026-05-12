@@ -1,0 +1,254 @@
+/* ─── 3-column page layout ─────────────────────────────────────── */
+.page {
+  display: grid;
+  grid-template-columns: 210px 1fr 160px;
+  gap: 16px;
+  align-items: start;
+  min-height: calc(100vh - 108px);
+}
+
+/* ─── LEFT: tabs + filters ─────────────────────────────────────── */
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #d8e3ff;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.tab:hover {
+  border-color: #006ffd;
+  color: #006ffd;
+}
+
+.tabActive {
+  background: #006ffd;
+  border-color: #006ffd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.filterBox {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.filterLabel {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.filterInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 13px;
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  background: #f8fafc;
+  margin-bottom: 4px;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.filterInput:focus {
+  border-color: #006ffd;
+  background: #fff;
+}
+
+.searchBtn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  background: #006ffd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s ease;
+}
+
+.searchBtn:hover {
+  background: #0060e0;
+}
+
+/* ─── CENTER: course list ──────────────────────────────────────── */
+.center {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.centerHeader {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.centerTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.card:last-child {
+  border-bottom: none;
+}
+
+.card:hover {
+  background: #f8fafc;
+}
+
+.cardSelected {
+  background: #eff6ff;
+}
+
+.cardImage {
+  width: 100px;
+  height: 68px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e2e8f0;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: #f1f5f9;
+}
+
+.cardInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cardSpecialty {
+  font-size: 13px;
+  color: #006ffd;
+  font-weight: 500;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #006ffd;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ─── RIGHT: action panel ──────────────────────────────────────── */
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #d8e3ff;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover:not(:disabled) {
+  border-color: #006ffd;
+  color: #006ffd;
+  background: #eff6ff;
+}
+
+.actionDanger:hover:not(:disabled) {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.actionDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "skillserve-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "api-front-ss",
+    "api-backend-ss-main"
+  ],
+  "scripts": {
+    "start:frontend": "npm run start --workspace=api-front-ss",
+    "start:backend": "npm run dev --workspace=api-backend-ss-main",
+    "dev": "npm run start:frontend & npm run start:backend",
+    "build:frontend": "npm run build --workspace=api-front-ss",
+    "install:all": "npm install"
+  }
+}

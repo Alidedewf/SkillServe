@@ -1,0 +1,99 @@
+.container {
+    background: linear-gradient(180deg, #006ffd 0%, #fff 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-top: 5px ;
+  }
+  
+  .title {
+    font-size: 17px;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .form {
+    border-radius: 8px;
+    padding-right: 20px;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    color: #71727a;
+  }
+  
+  .formGroup input {
+    width: 92%;
+    padding: 10px;
+    border-radius: 10px;
+    background: #FFF;
+    border: none;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  }
+  
+  .submitButton {
+    width: 100%;
+    background: #006ffd;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .submitButton:hover {
+    background: #005bb5;
+  }
+
+  .avatarSection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .avatarContainer {
+    position: relative;
+  }
+  
+  .avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #006ffd;
+  }
+  
+  .avatarUploadButton {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #006ffd;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  
+  

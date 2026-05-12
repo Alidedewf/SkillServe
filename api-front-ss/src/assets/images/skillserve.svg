@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1">
+  <g id="layer1">
+    <path
+       style="fill:#000000;stroke-width:0.472598"
+       d="M 155.47752,115.10526 A 51.228664,51.630985 0 0 1 101.4258,160.09962 51.228664,51.630985 0 0 1 53.432025,108.59792 51.228664,51.630985 0 0 1 101.37382,57.047067 51.228664,51.630985 0 0 1 155.4709,101.986 l -50.81022,6.58567 z" />
+    <path
+       style="fill:#57f9ee;fill-opacity:1;stroke-width:0.338798"
+       d="M 150.68524,114.37719 A 46.80315,46.93726 0 0 1 98.342931,154.99842 46.80315,46.93726 0 0 1 57.829592,102.51248 46.80315,46.93726 0 0 1 110.15924,61.874852 46.80315,46.93726 0 0 1 150.68893,114.3481 l -46.43059,-5.91054 z" />
+    <text
+       style="font-size:101.472px;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.5285"
+       x="65.6"
+       y="147.51">S</text>
+    <text
+       style="font-size:96.7217px;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.503758"
+       x="71.11"
+       y="137.41">S</text>
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.233975"
+       width="38.69"
+       height="4.96"
+       x="140.65"
+       y="105.68"
+       ry="2.48" />
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.183112"
+       width="23.70"
+       height="4.96"
+       x="33.33"
+       y="106.05"
+       ry="2.48" />
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.177899"
+       width="25.08"
+       height="4.43"
+       x="164.94"
+       y="114.72"
+       ry="2.21" />
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.177899"
+       width="25.08"
+       height="4.43"
+       x="19.51"
+       y="113.56"
+       ry="2.21" />
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.130094"
+       width="13.13"
+       height="4.52"
+       x="182.46"
+       y="106.18"
+       ry="2.26" />
+    <rect
+       style="fill:#58f9ee;fill-opacity:1;stroke-width:0.130094"
+       width="13.13"
+       height="4.52"
+       x="16.55"
+       y="106.22"
+       ry="2.26" />
+    <path
+       style="fill:#004a4a;fill-opacity:1;stroke-width:0.401365"
+       d="m 146.65814,108.54775 a 3.0509219,2.8162355 0 0 1 -3.412,2.43727 3.0509219,2.8162355 0 0 1 -2.64091,-3.14916 3.0509219,2.8162355 0 0 1 3.41117,-2.43825 3.0509219,2.8162355 0 0 1 2.64198,3.14839 l -3.02664,-0.35463 z" />
+    <path
+       style="fill:#08bfb6;fill-opacity:1;stroke-width:0.401365"
+       d="m 66.08399,108.82964 a 3.0509219,2.8162355 0 0 1 -3.411999,2.43728 3.0509219,2.8162355 0 0 1 -2.640913,-3.14916 3.0509219,2.8162355 0 0 1 3.411174,-2.43826 3.0509219,2.8162355 0 0 1 2.641978,3.1484 l -3.026636,-0.35463 z" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke-width:0.266551"
+       d="m 53.552231,105.98766 3.62021,-0.037 0.0558,5.34222 -3.66594,0.0375 -0.0558,-5.34222 z" />
+    <text
+       style="font-size:37.5105px;text-anchor:start;fill:#032e2c;fill-opacity:1;stroke-width:0.195364"
+       x="15.05"
+       y="192.64">SkillServe</text>
+  </g>
+</svg>

@@ -1,0 +1,197 @@
+.container {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Inter', -apple-system, sans-serif;
+  padding-bottom: 100px; /* Для Navbar */
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── ХЕДЕР С ГРАДИЕНТОМ ───────────────────── */
+.header {
+  height: 220px;
+  background: linear-gradient(180deg, #2196f3 0%, #bbdefb 60%, #f8fafc 100%);
+  padding: 40px 24px 20px;
+  position: relative;
+}
+
+.title {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ── КОНТЕНТ ───────────────────────────────── */
+.content {
+  padding: 0 20px;
+  margin-top: -80px; /* Наезжает на градиент */
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ── ОБЩИЕ СТИЛИ ДЛЯ СЕКЦИЙ ────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.seeAllBtn {
+  background: none;
+  border: none;
+  color: #2196f3;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ── ДОСТИЖЕНИЯ ────────────────────────────── */
+.achievementsScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 12px; /* Для тени */
+  scrollbar-width: none; /* Firefox */
+}
+
+.achievementsScroll::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.achievementCard {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f1f5f9;
+}
+
+.achievementCard img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+/* ── РЕЙТИНГ ПРЕВЬЮ ────────────────────────── */
+.ratingBox {
+  background: #eef2ff; /* Светло-голубой фон как в макете */
+  border-radius: 24px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ratingItem {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 12px 16px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.rankBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.userXp {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Иконки корон-шестиугольников (стилизация) */
+.goldCrown, .silverCrown {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px; /* Немного скругляем чтобы было похоже на шестиугольник, либо просто как фон */
+}
+
+.goldCrown {
+  color: #fff;
+  background: #facc15;
+}
+
+.silverCrown {
+  color: #fff;
+  background: #cbd5e1;
+}
+
+.goldCrown svg, .silverCrown svg {
+  width: 20px;
+  height: 20px;
+}
+
+.loadingText {
+  text-align: center;
+  color: #64748b;
+  font-weight: 500;
+  padding: 20px;
+}

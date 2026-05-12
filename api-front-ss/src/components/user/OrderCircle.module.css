@@ -1,0 +1,18 @@
+/* src/styles/OrderCircle.module.css */
+
+.circle {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffffff 0%, #006FFD 100%);
+    box-shadow: 0px 4px 10px rgba(143, 144, 152, 0.25); /* Тень */
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  
