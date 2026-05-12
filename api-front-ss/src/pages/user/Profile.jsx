@@ -26,7 +26,7 @@ const Profile = () => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) { navigate('/login'); return; }
-                const res = await fetch('http://localhost:5001/api/users/profile', {
+                const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/users/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Ошибка загрузки профиля');

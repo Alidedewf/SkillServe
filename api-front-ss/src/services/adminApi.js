@@ -1,7 +1,7 @@
 // ─── Admin API Service (РЕАЛЬНЫЙ БЭКЕНД) ──────────────────────────────────────
 // Все функции общаются напрямую с сервером Express + Neon PostgreSQL.
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');

@@ -26,7 +26,7 @@ const AdminLayout = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const res = await fetch('http://localhost:5001/api/users/profile', {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/users/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
