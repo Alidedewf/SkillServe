@@ -76,7 +76,39 @@ const TestPage = () => {
     };
 
     if (loading) {
-        return <p className={styles.loading}>Загрузка...</p>;
+        return (
+            <div className={`${styles.container} ${styles.skeletonContainer}`}>
+                {/* Header skeleton */}
+                <div className={styles.headerSkeleton}>
+                    <div className={styles.skeletonCircle}></div>
+                    <div className={styles.skeletonBar} style={{ width: '40%', height: '18px' }}></div>
+                    <div className={styles.skeletonBar} style={{ width: '15%', height: '18px' }}></div>
+                </div>
+
+                {/* Card skeleton */}
+                <div className={styles.cardSkeleton}>
+                    {/* Image placeholder */}
+                    <div className={styles.skeletonImage}></div>
+                    
+                    {/* Type placeholder */}
+                    <div className={styles.skeletonBar} style={{ width: '30%', height: '14px', marginBottom: '16px' }}></div>
+                    
+                    {/* Question text placeholders */}
+                    <div className={styles.skeletonBar} style={{ width: '90%', height: '22px', marginBottom: '12px' }}></div>
+                    <div className={styles.skeletonBar} style={{ width: '70%', height: '22px', marginBottom: '32px' }}></div>
+
+                    {/* Answer options placeholders */}
+                    <div className={styles.answersSkeleton}>
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className={styles.skeletonAnswerOption}>
+                                <div className={styles.skeletonCircle} style={{ width: '20px', height: '20px' }}></div>
+                                <div className={styles.skeletonBar} style={{ width: '60%', height: '16px' }}></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
@@ -101,30 +133,36 @@ const TestPage = () => {
             </div>
     
             <div className={styles.questionCard}>
-                <img
-                    src={currentQuestion.image || '/default-image.jpg'}
-                    alt="Вопрос"
-                    className={styles.questionImage}
-                />
+                {currentQuestion.image_url && (
+                    <img
+                        src={currentQuestion.image_url}
+                        alt="Вопрос"
+                        className={styles.questionImage}
+                    />
+                )}
                 <p className={styles.questionType}>Одиночный выбор</p>
                 <p className={styles.question}>{currentQuestion.content}</p>
                 <div className={styles.answers}>
                     {currentQuestion.answers.map((answer) => (
-                        <label key={answer.id} className={styles.answerLabel}>
+                        <label 
+                            key={answer.id} 
+                            className={`${styles.answerLabel} ${selectedAnswers[currentQuestion.id] === answer.id ? styles.selected : ''}`}
+                        >
                             <input
-                            type="radio"
-                            name={`question-${currentQuestion.id}`}
-                            value={answer.id}
-                            checked={selectedAnswers[currentQuestion.id] === answer.id}
-                            onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
-                            className={styles.radioInput}
+                                type="radio"
+                                name={`question-${currentQuestion.id}`}
+                                value={answer.id}
+                                checked={selectedAnswers[currentQuestion.id] === answer.id}
+                                onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
+                                className={styles.radioInput}
                             />
                             <span className={styles.customRadio}></span>
-                            {answer.content}
-                            </label>
-                        ))}
-                        </div>
+                            <span className={styles.answerText}>{answer.content}</span>
+                        </label>
+                    ))}
                 </div>
+            </div>
+                
                 <div className={styles.actions}>
     {selectedAnswers[currentQuestion.id] ? (
         currentQuestionIndex < test.questions.length - 1 ? (

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import CourseCreateModal from '../../components/admin/CourseCreateModal';
+import AIGenerateModal from '../../components/admin/AIGenerateModal';
 import {
   adminGetCourses,
   adminDeleteCourse,
@@ -23,6 +24,7 @@ const AdminCourses = () => {
   const [filters, setFilters] = useState({ keyword: '', specialty: '', date: '' });
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,6 +86,12 @@ const AdminCourses = () => {
         <CourseCreateModal
           onClose={() => setShowCreateModal(false)}
           onCreated={() => { setShowCreateModal(false); load(); }}
+        />
+      )}
+      {showAIModal && (
+        <AIGenerateModal
+          onClose={() => setShowAIModal(false)}
+          onCreated={() => { setShowAIModal(false); load(); }}
         />
       )}
       <div className={styles.page}>
@@ -178,6 +186,12 @@ const AdminCourses = () => {
 
         {/* ─── RIGHT: Actions ───────────────────────────────── */}
         <aside className={styles.right}>
+          <button
+            className={`${styles.actionBtn} ${styles.actionAI}`}
+            onClick={() => setShowAIModal(true)}
+          >
+            🪄 Создать с ИИ
+          </button>
           <button
             className={styles.actionBtn}
             onClick={() => setShowCreateModal(true)}

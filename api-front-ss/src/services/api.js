@@ -165,6 +165,15 @@ export const fetchLesson = async (courseID, lessonID) => {
     return res.json();
 };
 
+export const completeLesson = async (lessonID) => {
+    const res = await fetch(`${API_URL}/lessons/${lessonID}/complete`, {
+        method: 'POST',
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка завершения урока');
+    return res.json();
+};
+
 export const startTest = async (courseID, testID) => {
     const res = await fetch(`${API_URL}/tests/${testID}`, {
         headers: getHeaders()
@@ -196,5 +205,37 @@ export const fetchUserNotifications = async () => {
         headers: getHeaders()
     });
     if (!res.ok) throw new Error('Ошибка получения уведомлений');
+    return res.json();
+};
+
+export const fetchAchievements = async () => {
+    const res = await fetch(`${API_URL}/achievements`, {
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка получения достижений');
+    return res.json();
+};
+
+export const fetchMyAchievements = async () => {
+    const res = await fetch(`${API_URL}/achievements/my`, {
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка получения моих достижений');
+    return res.json();
+};
+
+export const fetchAchievementIcons = async () => {
+    const res = await fetch(`${API_URL}/achievements/icons`, {
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка получения списка иконок');
+    return res.json();
+};
+
+export const fetchMenu = async () => {
+    const res = await fetch(`${API_URL}/menu`, {
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки меню');
     return res.json();
 };

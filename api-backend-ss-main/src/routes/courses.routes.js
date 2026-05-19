@@ -139,17 +139,27 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // GET /api/courses/:id/lessons
 router.get('/:id/lessons', authMiddleware, async (req, res) => {
   try {
+    const courseId = parseInt(req.params.id);
     const lessons = await prisma.lesson.findMany({
-      where: { course_id: parseInt(req.params.id) },
+      where: { course_id: courseId },
       orderBy: { id: 'asc' }
     });
-    
-    // В будущем тут можно вычислять completed статусы на основе связей
+
+    // Получаем пройденные уроки текущего юзера в этом курсе
+    const completedLessons = await prisma.userLessonProgress.findMany({
+      where: {
+        user_id: req.user.id,
+        lesson: { course_id: courseId }
+      },
+      select: { lesson_id: true }
+    });
+    const completedIds = new Set(completedLessons.map(c => c.lesson_id));
+
     const formatted = lessons.map(l => ({
       id: l.id,
       title: l.title,
-      type: l.type.toLowerCase(), // 'video' или 'text'
-      is_completed: false // сделаем реальным во 2 стадии
+      type: l.type.toLowerCase(),
+      is_completed: completedIds.has(l.id)
     }));
     
     res.json(formatted);

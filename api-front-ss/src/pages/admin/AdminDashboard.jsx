@@ -59,7 +59,7 @@ const AdminDashboard = () => {
             <FiPlusCircle size={28} className={styles.linkIcon} />
             <span>Создать курс</span>
           </div>
-          <div className={styles.linkCard} onClick={() => navigate('/admin/users/new')}>
+          <div className={styles.linkCard} onClick={() => navigate('/admin/users')}>
             <FiPlusCircle size={28} className={styles.linkIcon} />
             <span>Добавить сотрудника</span>
           </div>

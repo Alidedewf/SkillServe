@@ -21,6 +21,7 @@ const AdminUsers = () => {
   const [filters, setFilters] = useState({ keyword: '', position: '' });
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editUser, setEditUser] = useState(null); // юзер для редактирования
   const [showPositionModal, setShowPositionModal] = useState(false);
   const [positions, setPositions] = useState([]);
 
@@ -73,8 +74,9 @@ const AdminUsers = () => {
     <AdminLayout>
       {showCreateModal && (
         <UserCreateModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); load(); }}
+          editUser={editUser}
+          onClose={() => { setShowCreateModal(false); setEditUser(null); }}
+          onCreated={() => { setShowCreateModal(false); setEditUser(null); load(); }}
         />
       )}
       {showPositionModal && (
@@ -205,7 +207,10 @@ const AdminUsers = () => {
               <button
                 className={`${styles.actionBtn} ${!selected ? styles.actionDisabled : ''}`}
                 disabled={!selected}
-                onClick={() => navigate(`/admin/users/${selected}`)}
+                onClick={() => {
+                  setEditUser(selectedUser);
+                  setShowCreateModal(true);
+                }}
               >
                 Редактировать
               </button>

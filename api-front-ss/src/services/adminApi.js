@@ -166,6 +166,84 @@ export const adminGetCourse = async (id) => {
   return res.json();
 };
 
+// ─── ADMIN MENU API ──────────────────────────────────────────────────────────
+export const adminGetMenuCategories = async () => {
+    const res = await fetch(`${API_URL}/admin/menu/categories`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Ошибка загрузки категорий меню');
+    return res.json();
+};
+
+export const adminCreateMenuCategory = async (data) => {
+    const res = await fetch(`${API_URL}/admin/menu/categories`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Ошибка создания категории');
+    return res.json();
+};
+
+export const adminCreateMenuItem = async (data) => {
+    const res = await fetch(`${API_URL}/admin/menu/items`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Ошибка создания блюда');
+    return res.json();
+};
+
+export const adminUpdateMenuItem = async (id, data) => {
+    const res = await fetch(`${API_URL}/admin/menu/items/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Ошибка обновления блюда');
+    return res.json();
+};
+
+export const adminDeleteMenuItem = async (id) => {
+    const res = await fetch(`${API_URL}/admin/menu/items/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка удаления блюда');
+    return res.json();
+};
+
+export const adminGetMenuPdf = async () => {
+    const res = await fetch(`${API_URL}/admin/menu/pdf`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Ошибка получения PDF меню');
+    return res.json();
+};
+
+export const adminUploadMenuPdf = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // При загрузке файлов Content-Type не нужен (браузер сам ставит multipart/form-data)
+    const headers = getHeaders();
+    delete headers['Content-Type'];
+
+    const res = await fetch(`${API_URL}/admin/menu/upload-pdf`, {
+        method: 'POST',
+        headers,
+        body: formData
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки PDF');
+    return res.json();
+};
+
+export const adminDeleteMenuPdf = async () => {
+    const res = await fetch(`${API_URL}/admin/menu/pdf`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Ошибка удаления PDF');
+    return res.json();
+};
+
 export const adminCreateCourse = async (courseData) => {
   const res = await fetch(`${API_URL}/admin/courses`, {
     method: 'POST',
@@ -264,5 +342,84 @@ export const adminGetStats = async () => {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || 'Ошибка получения статистики');
   }
+  return res.json();
+};
+
+// ─── AI Generation ────────────────────────────────────────────────────────────
+
+export const aiGenerateCourse = async ({ topic, lessonsCount, difficulty, category }) => {
+  const res = await fetch(`${API_URL}/admin/ai/generate-course`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ topic, lessonsCount, difficulty, category }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка генерации курса');
+  }
+  return res.json();
+};
+
+export const aiGenerateImage = async ({ title, category, type }) => {
+  const res = await fetch(`${API_URL}/admin/ai/generate-image`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ title, category, type }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка генерации изображения');
+  }
+  return res.json();
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACHIEVEMENTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const adminGetAchievements = async () => {
+  const res = await fetch(`${API_URL}/admin/achievements`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка загрузки достижений');
+  return res.json();
+};
+
+export const adminCreateAchievement = async (data) => {
+  const res = await fetch(`${API_URL}/admin/achievements`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Ошибка создания достижения');
+  return res.json();
+};
+
+export const adminUpdateAchievement = async (id, data) => {
+  const res = await fetch(`${API_URL}/admin/achievements/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Ошибка обновления достижения');
+  return res.json();
+};
+
+export const adminDeleteAchievement = async (id) => {
+  const res = await fetch(`${API_URL}/admin/achievements/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка удаления достижения');
+  return res.json();
+};
+
+export const adminGrantAchievement = async (id, user_id) => {
+  const res = await fetch(`${API_URL}/admin/achievements/${id}/grant`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ user_id }),
+  });
+  if (!res.ok) throw new Error('Ошибка выдачи достижения');
   return res.json();
 };

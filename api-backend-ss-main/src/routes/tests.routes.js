@@ -85,8 +85,27 @@ router.post('/:id/submit', authMiddleware, async (req, res) => {
       }
     });
 
-    // Если тест сдан, можно обновить прогресс по курсу
-    // Во 2 фазе сделаем автоматический пересчет прогресса курса
+    // Если тест сдан на 100%, выдаем достижение привязанное к курсу (если есть)
+    if (correct_count === test.questions.length && test.course_id) {
+      const achievement = await prisma.achievement.findFirst({
+        where: { course_id: test.course_id }
+      });
+      if (achievement) {
+        await prisma.userAchievement.upsert({
+          where: {
+            user_id_achievement_id: {
+              user_id: req.user.id,
+              achievement_id: achievement.id
+            }
+          },
+          update: {},
+          create: {
+            user_id: req.user.id,
+            achievement_id: achievement.id
+          }
+        });
+      }
+    }
 
     res.json({
       correct_count,

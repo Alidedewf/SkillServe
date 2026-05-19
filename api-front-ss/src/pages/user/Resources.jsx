@@ -1,27 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/user/Navbar';
-import { fetchRating } from '../../services/api';
+import { fetchRating, fetchAchievements, fetchMyAchievements, fetchAchievementIcons } from '../../services/api';
 import styles from './Resources.module.css';
-
-// Импорт заглушек для достижений
-import ach1 from '../../assets/images/achievements/achievement_1_1778142948685.png';
-import ach2 from '../../assets/images/achievements/achievement_2_1778142961390.png';
-import ach3 from '../../assets/images/achievements/achievement_3_1778142973565.png';
-import ach4 from '../../assets/images/achievements/achievement_4_1778142989448.png';
 
 const Resources = () => {
   const navigate = useNavigate();
   const [topUsers, setTopUsers] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [myAchievements, setMyAchievements] = useState([]);
+  const [icons, setIcons] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const result = await fetchRating();
+        const [ratingRes, achs, myAchs, iconsData] = await Promise.all([
+          fetchRating(),
+          fetchAchievements().catch(() => []),
+          fetchMyAchievements().catch(() => []),
+          fetchAchievementIcons().catch(() => [])
+        ]);
+        
         // Берем только топ-2 для превью
-        const top2 = result.leaderboard.filter(u => u.rank <= 2).sort((a, b) => a.rank - b.rank);
+        const top2 = ratingRes.leaderboard.filter(u => u.rank <= 2).sort((a, b) => a.rank - b.rank);
         setTopUsers(top2);
+        setAchievements(achs);
+        setMyAchievements(myAchs);
+        setIcons(iconsData);
       } catch (err) {
         console.error('Ошибка загрузки рейтинга', err);
       } finally {
@@ -31,12 +37,10 @@ const Resources = () => {
     loadData();
   }, []);
 
-  const achievements = [
-    { id: 1, image: ach1 },
-    { id: 2, image: ach2 },
-    { id: 3, image: ach3 },
-    { id: 4, image: ach4 },
-  ];
+  const resolveIconUrl = (imgId) => {
+    const found = icons.find(i => i.id === imgId);
+    return found ? found.url : '';
+  };
 
   return (
     <div className={styles.container}>
@@ -55,11 +59,23 @@ const Resources = () => {
           </div>
           
           <div className={styles.achievementsScroll}>
-            {achievements.map((ach) => (
-              <div key={ach.id} className={styles.achievementCard}>
-                <img src={ach.image} alt={`Achievement ${ach.id}`} />
-              </div>
-            ))}
+            {achievements.length === 0 ? (
+              <p className={styles.emptyText}>Достижения скоро появятся</p>
+            ) : (
+              achievements.map((ach) => {
+                const isEarned = myAchievements.some(ma => ma.id === ach.id);
+                const imgSrc = resolveIconUrl(ach.image_url);
+                return (
+                  <div 
+                    key={ach.id} 
+                    className={`${styles.achievementCard} ${!isEarned ? styles.locked : ''}`}
+                    title={ach.title + (ach.description ? ` - ${ach.description}` : '') + (!isEarned ? ' (Заблокировано)' : '')}
+                  >
+                    <img src={imgSrc} alt={ach.title} />
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

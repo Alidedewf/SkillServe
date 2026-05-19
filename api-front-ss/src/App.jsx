@@ -30,8 +30,10 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCourseEditor from './pages/admin/AdminCourseEditor';
+import AdminAchievements from './pages/admin/AdminAchievements';
+import AdminMenu from './pages/admin/AdminMenu';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
-
+import MenuPage from './pages/user/MenuPage';
 
 const App = () => {
   return (
@@ -59,14 +61,17 @@ const App = () => {
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/lesson/:type/:id" element={<CoursePage />} />
-            <Route path="/course/:id/lessons" element={<CourseLessonsPage />} />;  
+            <Route path="/course/:id/lessons" element={<CourseLessonsPage />} />  
             <Route path="/lesson/text/:id" element={<TextLessonPage />} />
+            <Route path="/menu" element={<MenuPage />} />
 
             {/* Admin routes — доступ только при role: 'admin' в токене */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
             <Route path="/admin/courses" element={<ProtectedAdminRoute><AdminCourses /></ProtectedAdminRoute>} />
             <Route path="/admin/courses/:id" element={<ProtectedAdminRoute><AdminCourseEditor /></ProtectedAdminRoute>} />
             <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
+            <Route path="/admin/achievements" element={<ProtectedAdminRoute><AdminAchievements /></ProtectedAdminRoute>} />
+            <Route path="/admin/menu" element={<ProtectedAdminRoute><AdminMenu /></ProtectedAdminRoute>} />
           </Routes>
         </AnimatePresence>
       </Router>

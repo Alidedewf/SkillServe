@@ -51,9 +51,10 @@ model User {
   updated_at DateTime @updatedAt
 
   // Связи
-  progress     UserCourseProgress[]
-  testAttempts TestAttempt[]
-  achievements UserAchievement[]
+  progress       UserCourseProgress[]
+  lessonProgress UserLessonProgress[]
+  testAttempts   TestAttempt[]
+  achievements   UserAchievement[]
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -90,6 +91,7 @@ model Lesson {
   created_at  DateTime   @default(now())
 
   course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  completions UserLessonProgress[]
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -141,6 +143,18 @@ model UserCourseProgress {
   @@unique([user_id, course_id])
 }
 
+model UserLessonProgress {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  lesson_id    Int
+  completed_at DateTime @default(now())
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+}
+
 model TestAttempt {
   id              Int      @id @default(autoincrement())
   user_id         Int
@@ -177,4 +191,35 @@ model UserAchievement {
   achievement Achievement @relation(fields: [achievement_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, achievement_id])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// МЕНЮ РЕСТОРАНА
+// ─────────────────────────────────────────────────────────────────────
+model MenuCategory {
+  id    Int    @id @default(autoincrement())
+  name  String
+  order Int    @default(0)
+
+  items MenuItem[]
+}
+
+model MenuItem {
+  id          Int      @id @default(autoincrement())
+  category_id Int
+  title       String
+  description String?
+  price       String?  // String to allow "500 тг" or similar
+  image_url   String?
+  visible_to  String[] // ["Официант", "Бармен"], empty means all
+
+  category MenuCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// НАСТРОЙКИ СИСТЕМЫ
+// ─────────────────────────────────────────────────────────────────────
+model Setting {
+  key   String @id
+  value String
 }

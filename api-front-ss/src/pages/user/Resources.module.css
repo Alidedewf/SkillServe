@@ -195,3 +195,16 @@
   font-weight: 500;
   padding: 20px;
 }
+
+.locked {
+  filter: grayscale(100%) opacity(0.4);
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.emptyText {
+  color: #64748b;
+  font-size: 14px;
+  padding: 20px 0;
+  font-weight: 500;
+}

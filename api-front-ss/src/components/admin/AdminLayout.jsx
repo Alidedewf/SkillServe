@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiHome, FiBook, FiUsers, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiBook, FiUsers, FiLogOut, FiAward, FiList } from 'react-icons/fi';
 import { adminLogout } from '../../services/adminApi';
 import styles from './AdminLayout.module.css';
 
@@ -8,6 +8,8 @@ const navItems = [
   { to: '/admin',         label: 'Главная',    icon: FiHome,  end: true },
   { to: '/admin/courses', label: 'Курсы',       icon: FiBook },
   { to: '/admin/users',   label: 'Персонал',    icon: FiUsers },
+  { to: '/admin/achievements', label: 'Достижения', icon: FiAward },
+  { to: '/admin/menu',    label: 'Меню',        icon: FiList },
 ];
 
 const AdminLayout = ({ children }) => {

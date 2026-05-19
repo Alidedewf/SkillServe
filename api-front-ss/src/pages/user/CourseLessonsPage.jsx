@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import OrderCircle from '../../components/user/OrderCircle'; 
 import styles from './CourseLessonsPage.module.css';
-import { FiPlayCircle, FiFileText, FiClock, FiArrowLeft } from 'react-icons/fi';
+import { FiPlayCircle, FiFileText, FiClock, FiX, FiStar, FiClipboard, FiCheckCircle } from 'react-icons/fi';
 import { fetchCourseName, fetchLessons, fetchTests } from '../../services/api';
 
 const CourseLessonsPage = () => {
@@ -37,81 +36,120 @@ const CourseLessonsPage = () => {
   }, [courseID]);
 
   const handleLessonClick = (lesson) => {
-    navigate(`/course/${courseID}/lessons/${lesson.id}`); // Переход на страницу урока
+    navigate(`/course/${courseID}/lessons/${lesson.id}`);
   };
 
   const handleTestClick = (testId) => {
-    navigate(`/course/${courseID}/test/${testId}`); // Переход на страницу теста
+    navigate(`/course/${courseID}/test/${testId}`);
   };
 
   if (loading) {
-    return <p className={styles.loading}>Загрузка...</p>;
-  }
-
-  return (
-      <div className={styles.container}>
-        <button onClick={() => navigate(-1)} className={styles.backButton}>
-          <FiArrowLeft size={20} /> Назад
-        </button>
-        <h1 className={styles.courseName}>{courseName}</h1>
-
-        {/* Уроки */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Уроки курса</h3>
-          <div className={styles.lessonList}>
-            {lessons.map((lesson) => (
-                <div
-                    key={lesson.id}
-                    className={styles.lessonCard}
-                    onClick={() => handleLessonClick(lesson)}
-                >
-                  <OrderCircle order={lesson.order} />
-                  <div className={styles.lessonInfo}>
-                    <h3 className={styles.lessonTitle}>{lesson.title}</h3>
-                    <div className={styles.lessonClock}>
-                      <FiClock className={styles.clockIcon} size={16} color="#71727A" />
-                      <p className={styles.lessonType}>
-                        {lesson.type === 'video' ? '10 мин' : '15 минут чтения'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className={styles.iconContainer}>
-                    {lesson.type === 'video' ? (
-                        <FiPlayCircle className={styles.playIcon} size={24} color="#006ffd" />
-                    ) : (
-                        <FiFileText className={styles.documentIcon} size={24} color="#006ffd" />
-                    )}
-                  </div>
-                </div>
-            ))}
-          </div>
+    return (
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <button onClick={() => navigate('/courses')} className={styles.closeBtn}>
+            <FiX size={24} />
+          </button>
+          <div className={styles.skeletonTitle}></div>
         </div>
-
-        {/* Тесты */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Тестовое задание/Практика</h3>
-          <div className={styles.lessonList}>
-            {tests.map((test) => (
-                <div
-                    key={test.id}
-                    className={styles.lessonCard}
-                    onClick={() => handleTestClick(test.id)}
-                >
-                  <OrderCircle order="🗒" /> 
-                  <div className={styles.lessonInfo}>
-                    <h3 className={styles.lessonTitle}>{test.title}</h3>
-                    <p className={styles.lessonType}>
-                      Баллы: {test.score.current}/{test.score.max}
-                    </p>
-                  </div>
-                  <div className={styles.iconContainer}>
-                    <FiPlayCircle size={24} color="#006ffd" />
-                  </div>
+        <div className={styles.content}>
+          <div className={styles.skeletonSectionTitle}></div>
+          <div className={styles.cardGroup}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={styles.skeletonCard}>
+                <div className={styles.skeletonCircle}></div>
+                <div className={styles.skeletonInfo}>
+                  <div className={styles.skeletonLine}></div>
+                  <div className={styles.skeletonLineSm}></div>
                 </div>
+                <div className={styles.skeletonIcon}></div>
+              </div>
             ))}
           </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className={styles.page}>
+      {/* ─── Dark Header ──────────────────────────────────────── */}
+      <div className={styles.header}>
+        <button onClick={() => navigate('/courses')} className={styles.closeBtn}>
+          <FiX size={24} />
+        </button>
+        <h1 className={styles.courseTitle}>{courseName}</h1>
+      </div>
+
+      {/* ─── Content ──────────────────────────────────────────── */}
+      <div className={styles.content}>
+
+        {/* Уроки */}
+        <h3 className={styles.sectionTitle}>Уроки курса</h3>
+        <div className={styles.cardGroup}>
+          {lessons.map((lesson, i) => (
+            <div
+              key={lesson.id}
+              className={`${styles.card} ${lesson.is_completed ? styles.cardCompleted : ''}`}
+              onClick={() => handleLessonClick(lesson)}
+            >
+              <div className={lesson.is_completed ? styles.orderCircleCompleted : styles.orderCircle}>
+                {lesson.is_completed ? <FiCheckCircle size={20} /> : String(i + 1).padStart(2, '0')}
+              </div>
+              <div className={styles.cardInfo}>
+                <h4 className={styles.cardTitle}>{lesson.title}</h4>
+                <div className={styles.cardMeta}>
+                  {lesson.is_completed ? (
+                    <><FiCheckCircle size={14} color="#10b981" /><span style={{color:'#10b981'}}>Пройден</span></>
+                  ) : (
+                    <><FiClock size={14} color="#8E8E93" /><span>{lesson.type === 'video' ? '10 мин' : '15 мин чтения'}</span></>
+                  )}
+                </div>
+              </div>
+              <div className={styles.cardAction}>
+                {lesson.is_completed ? (
+                  <FiCheckCircle size={28} color="#10b981" />
+                ) : lesson.type === 'video' ? (
+                  <FiPlayCircle size={28} />
+                ) : (
+                  <FiFileText size={28} />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Тесты */}
+        {tests.length > 0 && (
+          <>
+            <h3 className={styles.sectionTitle}>Тестовое задание/Практика</h3>
+            <div className={styles.cardGroup}>
+              {tests.map((test) => (
+                <div
+                  key={test.id}
+                  className={styles.card}
+                  onClick={() => handleTestClick(test.id)}
+                >
+                  <div className={styles.testCircle}>
+                    <FiClipboard size={20} />
+                  </div>
+                  <div className={styles.cardInfo}>
+                    <h4 className={styles.cardTitle}>{test.title}</h4>
+                    <div className={styles.cardMeta}>
+                      <FiStar size={14} color="#8E8E93" />
+                      <span>{test.score?.current || 0}/{test.score?.max || 0} баллов</span>
+                    </div>
+                  </div>
+                  <div className={styles.cardAction}>
+                    <FiPlayCircle size={28} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

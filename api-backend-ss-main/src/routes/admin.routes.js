@@ -421,13 +421,18 @@ router.get('/users', async (req, res) => {
 // POST /api/admin/users
 router.post('/users', async (req, res) => {
   const { first_name, last_name, email, password, role, position } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email и пароль обязательны' });
+  }
+
   try {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
     }
 
-    const hashedPassword = await bcrypt.hash(password || '123456', 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const fullName = `${first_name || ''} ${last_name || ''}`.trim() || 'Сотрудник';
 
     const user = await prisma.user.create({
@@ -447,6 +452,7 @@ router.post('/users', async (req, res) => {
       email: user.email,
       role: user.role.toLowerCase(),
       position: user.position,
+      avatar_url: user.avatar_url || '',
       is_active: true,
       created_at: user.created_at
     });
@@ -489,6 +495,7 @@ router.put('/users/:id', async (req, res) => {
       email: user.email,
       role: user.role.toLowerCase(),
       position: user.position,
+      avatar_url: user.avatar_url || '',
       is_active: true,
       created_at: user.created_at
     });
@@ -511,6 +518,127 @@ router.delete('/users/:id', async (req, res) => {
   } catch (err) {
     console.error('[admin delete user]', err);
     res.status(500).json({ error: 'Ошибка удаления пользователя' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// УПРАВЛЕНИЕ ДОСТИЖЕНИЯМИ (ACHIEVEMENTS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// GET /api/admin/achievements
+router.get('/achievements', async (req, res) => {
+  try {
+    const achievements = await prisma.achievement.findMany({
+      include: {
+        course: { select: { title: true } },
+        _count: { select: { users: true } }
+      },
+      orderBy: { id: 'desc' }
+    });
+    res.json(achievements);
+  } catch (err) {
+    console.error('[admin get achievements]', err);
+    res.status(500).json({ error: 'Ошибка загрузки достижений' });
+  }
+});
+
+// POST /api/admin/achievements
+router.post('/achievements', async (req, res) => {
+  const { title, description, image_url, course_id } = req.body;
+  
+  if (!title) {
+    return res.status(400).json({ error: 'Название достижения обязательно' });
+  }
+
+  try {
+    const achievement = await prisma.achievement.create({
+      data: {
+        title,
+        description,
+        image_url,
+        course_id: course_id ? parseInt(course_id) : null
+      },
+      include: {
+        course: { select: { title: true } },
+        _count: { select: { users: true } }
+      }
+    });
+    res.status(201).json(achievement);
+  } catch (err) {
+    console.error('[admin create achievement]', err);
+    res.status(500).json({ error: 'Ошибка создания достижения' });
+  }
+});
+
+// PUT /api/admin/achievements/:id
+router.put('/achievements/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, description, image_url, course_id } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: 'Название достижения обязательно' });
+  }
+
+  try {
+    const achievement = await prisma.achievement.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        image_url,
+        course_id: course_id ? parseInt(course_id) : null
+      },
+      include: {
+        course: { select: { title: true } },
+        _count: { select: { users: true } }
+      }
+    });
+    res.json(achievement);
+  } catch (err) {
+    console.error('[admin update achievement]', err);
+    res.status(500).json({ error: 'Ошибка обновления достижения' });
+  }
+});
+
+// DELETE /api/admin/achievements/:id
+router.delete('/achievements/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await prisma.achievement.delete({ where: { id } });
+    res.json({ message: 'Достижение удалено' });
+  } catch (err) {
+    console.error('[admin delete achievement]', err);
+    res.status(500).json({ error: 'Ошибка удаления достижения' });
+  }
+});
+
+// POST /api/admin/achievements/:id/grant
+router.post('/achievements/:id/grant', async (req, res) => {
+  const achievement_id = parseInt(req.params.id);
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'Не указан user_id' });
+  }
+
+  try {
+    const userAchievement = await prisma.userAchievement.upsert({
+      where: {
+        user_id_achievement_id: {
+          user_id: parseInt(user_id),
+          achievement_id
+        }
+      },
+      update: {}, // Если уже есть, ничего не делаем
+      create: {
+        user_id: parseInt(user_id),
+        achievement_id
+      }
+    });
+    res.json(userAchievement);
+  } catch (err) {
+    console.error('[admin grant achievement]', err);
+    res.status(500).json({ error: 'Ошибка выдачи достижения' });
   }
 });
 
