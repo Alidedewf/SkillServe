@@ -12,9 +12,15 @@ const CourseCard = ({ course }) => {
 
   return (
     <div className={styles.card}>
-      <div className={styles.imageContainer}>
-        <img src={course.image} alt={course.title} className={styles.image} />
-      </div>
+      {course.image && (
+        <div className={styles.imageContainer}>
+          <img 
+            src={course.image} 
+            alt={course.title} 
+            className={styles.image} 
+          />
+        </div>
+      )}
       <div className={styles.content}>
         <h3 className={styles.title}>{course.title}</h3>
         <span className={styles.progress_span}>{course.progress}%</span>

@@ -2,10 +2,15 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const getHeaders = () => {
     const token = localStorage.getItem('token');
-    return {
+    const headers = {
         'Content-Type': 'application/json',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     };
+    const activeRestaurantId = localStorage.getItem('active_restaurant_id');
+    if (activeRestaurantId) {
+        headers['X-Restaurant-Id'] = activeRestaurantId;
+    }
+    return headers;
 };
 
 export const loginUser = async (email, password) => {
@@ -38,7 +43,8 @@ export const fetchHomePage = async (token) => {
         user: {
             name: user.name,
             progress: { percentage: user.progress || 0 },
-            avatar: user.avatar_url
+            avatar: user.avatar_url,
+            restaurant: user.restaurant
         },
         courses: courses
     };
@@ -197,6 +203,19 @@ export const fetchUserProfile = async () => {
         headers: getHeaders()
     });
     if (!res.ok) throw new Error('Ошибка получения профиля');
+    return res.json();
+};
+
+export const updateUserProfile = async (payload) => {
+    const res = await fetch(`${API_URL}/users/profile`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Ошибка обновления профиля');
+    }
     return res.json();
 };
 

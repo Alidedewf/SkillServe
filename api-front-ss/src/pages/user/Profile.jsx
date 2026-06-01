@@ -37,6 +37,7 @@ const Profile = () => {
                     avatar: data.avatar_url
                         ? data.avatar_url
                         : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf,ffd5dc`,
+                    restaurant: data.restaurant,
                 });
             } catch (err) {
                 console.error('Ошибка загрузки профиля:', err);

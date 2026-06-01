@@ -33,6 +33,16 @@ const ProfileHeader = ({ user }) => {
         </div>
         <h2 className={styles.name}>{(user?.full_name || user?.name || '').toLowerCase()}</h2>
         <p className={styles.email}>@{user?.email?.split('@')[0] || ''}</p>
+        {user?.restaurant && (
+          <div className={styles.restaurantBadge}>
+            {user.restaurant.logo_url ? (
+              <img src={user.restaurant.logo_url} alt="Logo" className={styles.restaurantMiniLogo} />
+            ) : (
+              <span className={styles.restaurantMiniIcon}>{user.restaurant.name.slice(0, 2).toUpperCase()}</span>
+            )}
+            <span className={styles.restaurantText}>{user.restaurant.name}</span>
+          </div>
+        )}
       </div>
       <button className={styles.notificationButton}
       onClick={handleNotificationsClick}>

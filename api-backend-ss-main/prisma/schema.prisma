@@ -12,8 +12,9 @@ datasource db {
 
 // ─── Роли пользователей ──────────────────────────────────────────────
 enum Role {
-  USER
+  SUPER_ADMIN
   ADMIN
+  USER
 }
 
 // ─── Статус курса ────────────────────────────────────────────────────
@@ -36,21 +37,78 @@ enum ProgressStatus {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// ПОЛЬЗОВАТЕЛИ
+// РЕСТОРАН (TENANT)
 // ─────────────────────────────────────────────────────────────────────
-model User {
+model Restaurant {
   id         Int      @id @default(autoincrement())
   name       String
-  email      String   @unique
-  password   String
-  role       Role     @default(USER)
-  avatar_url String?
-  position   String?
-  language   String   @default("ru")
+  slug       String   @unique
+  logo_url   String?
+  is_active  Boolean  @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // Связи
+  users          User[]
+  departments    Department[]
+  positions      Position[]
+  courses        Course[]
+  menuCategories MenuCategory[]
+  settings       RestaurantSetting[]
+  achievements   Achievement[]
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ОТДЕЛЫ (динамическая оргструктура)
+// ─────────────────────────────────────────────────────────────────────
+model Department {
+  id            Int    @id @default(autoincrement())
+  restaurant_id Int
+  name          String
+  order         Int    @default(0)
+
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  positions  Position[]
+
+  @@unique([restaurant_id, name])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ДОЛЖНОСТИ
+// ─────────────────────────────────────────────────────────────────────
+model Position {
+  id            Int    @id @default(autoincrement())
+  restaurant_id Int
+  department_id Int?
+  name          String
+  order         Int    @default(0)
+
+  restaurant Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [department_id], references: [id], onDelete: SetNull)
+  users      User[]
+
+  @@unique([restaurant_id, name])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ПОЛЬЗОВАТЕЛИ
+// ─────────────────────────────────────────────────────────────────────
+model User {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int?
+  position_id   Int?
+  name          String
+  email         String   @unique
+  password      String
+  role          Role     @default(USER)
+  avatar_url    String?
+  language      String   @default("ru")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Связи
+  restaurant     Restaurant?          @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  position       Position?            @relation(fields: [position_id], references: [id], onDelete: SetNull)
   progress       UserCourseProgress[]
   lessonProgress UserLessonProgress[]
   testAttempts   TestAttempt[]
@@ -61,16 +119,18 @@ model User {
 // КУРСЫ
 // ─────────────────────────────────────────────────────────────────────
 model Course {
-  id          Int          @id @default(autoincrement())
-  title       String
-  description String?
-  category    String       @default("Сервис")
-  image_url   String?
-  language    String       @default("ru")
-  status      CourseStatus @default(ACTIVE)
-  created_at  DateTime     @default(now())
+  id            Int          @id @default(autoincrement())
+  restaurant_id Int
+  title         String
+  description   String?
+  category      String       @default("Сервис")
+  image_url     String?
+  language      String       @default("ru")
+  status        CourseStatus @default(ACTIVE)
+  created_at    DateTime     @default(now())
 
   // Связи
+  restaurant   Restaurant           @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
   lessons      Lesson[]
   tests        Test[]
   progress     UserCourseProgress[]
@@ -90,7 +150,7 @@ model Lesson {
   order       Int
   created_at  DateTime   @default(now())
 
-  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course      Course               @relation(fields: [course_id], references: [id], onDelete: Cascade)
   completions UserLessonProgress[]
 }
 
@@ -171,14 +231,16 @@ model TestAttempt {
 // ДОСТИЖЕНИЯ
 // ─────────────────────────────────────────────────────────────────────
 model Achievement {
-  id          Int     @id @default(autoincrement())
-  title       String
-  description String?
-  image_url   String?
-  course_id   Int?    // null = глобальное достижение
+  id            Int     @id @default(autoincrement())
+  restaurant_id Int
+  title         String
+  description   String?
+  image_url     String?
+  course_id     Int?    // null = глобальное достижение ресторана
 
-  course Course? @relation(fields: [course_id], references: [id])
-  users  UserAchievement[]
+  restaurant Restaurant       @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  course     Course?           @relation(fields: [course_id], references: [id])
+  users      UserAchievement[]
 }
 
 model UserAchievement {
@@ -197,11 +259,13 @@ model UserAchievement {
 // МЕНЮ РЕСТОРАНА
 // ─────────────────────────────────────────────────────────────────────
 model MenuCategory {
-  id    Int    @id @default(autoincrement())
-  name  String
-  order Int    @default(0)
+  id            Int    @id @default(autoincrement())
+  restaurant_id Int
+  name          String
+  order         Int    @default(0)
 
-  items MenuItem[]
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  items      MenuItem[]
 }
 
 model MenuItem {
@@ -217,9 +281,15 @@ model MenuItem {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// НАСТРОЙКИ СИСТЕМЫ
+// НАСТРОЙКИ РЕСТОРАНА
 // ─────────────────────────────────────────────────────────────────────
-model Setting {
-  key   String @id
-  value String
+model RestaurantSetting {
+  id            Int    @id @default(autoincrement())
+  restaurant_id Int
+  key           String
+  value         String
+
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+
+  @@unique([restaurant_id, key])
 }

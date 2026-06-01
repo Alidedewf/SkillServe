@@ -1,0 +1,196 @@
+const prisma = require('../../prisma');
+const { notFound, conflict } = require('../../common/utils/errors');
+
+const getDepartments = async (restaurantId) => {
+  const where = {};
+  if (restaurantId) where.restaurant_id = restaurantId;
+
+  return prisma.department.findMany({
+    where,
+    include: { positions: { orderBy: { order: 'asc' } } },
+    orderBy: { order: 'asc' },
+  });
+};
+
+const createDepartment = async (restaurantId, { name, order = 0 }) => {
+  if (!restaurantId) {
+    const { badRequest } = require('../../common/utils/errors');
+    throw badRequest('Не указан ресторан');
+  }
+
+  const existing = await prisma.department.findUnique({
+    where: {
+      restaurant_id_name: {
+        restaurant_id: restaurantId,
+        name,
+      },
+    },
+  });
+  if (existing) throw conflict('Отдел с таким названием уже существует');
+
+  return prisma.department.create({
+    data: {
+      restaurant_id: restaurantId,
+      name,
+      order,
+    },
+  });
+};
+
+const updateDepartment = async (restaurantId, id, { name, order }) => {
+  const deptWhere = { id };
+  if (restaurantId) deptWhere.restaurant_id = restaurantId;
+
+  const dept = await prisma.department.findFirst({
+    where: deptWhere,
+  });
+  if (!dept) throw notFound('Отдел');
+
+  if (name && name !== dept.name) {
+    const existing = await prisma.department.findUnique({
+      where: {
+        restaurant_id_name: {
+          restaurant_id: restaurantId,
+          name,
+        },
+      },
+    });
+    if (existing) throw conflict('Отдел с таким названием уже существует');
+  }
+
+  return prisma.department.update({
+    where: { id },
+    data: {
+      name: name !== undefined ? name : dept.name,
+      order: order !== undefined ? order : dept.order,
+    },
+  });
+};
+
+const deleteDepartment = async (restaurantId, id) => {
+  const deptWhere = { id };
+  if (restaurantId) deptWhere.restaurant_id = restaurantId;
+
+  const dept = await prisma.department.findFirst({
+    where: deptWhere,
+  });
+  if (!dept) throw notFound('Отдел');
+
+  await prisma.department.delete({ where: { id } });
+  return { message: 'Отдел успешно удален' };
+};
+
+const getPositions = async (restaurantId, departmentId) => {
+  const where = {};
+  if (restaurantId) where.restaurant_id = restaurantId;
+
+  if (departmentId !== undefined) {
+    where.department_id = departmentId ? parseInt(departmentId) : null;
+  }
+  return prisma.position.findMany({
+    where,
+    include: { department: true },
+    orderBy: { order: 'asc' },
+  });
+};
+
+const createPosition = async (restaurantId, { department_id, name, order = 0 }) => {
+  if (!restaurantId) {
+    const { badRequest } = require('../../common/utils/errors');
+    throw badRequest('Не указан ресторан');
+  }
+
+  if (department_id) {
+    const deptWhere = { id: department_id };
+    if (restaurantId) deptWhere.restaurant_id = restaurantId;
+
+    const dept = await prisma.department.findFirst({
+      where: deptWhere,
+    });
+    if (!dept) throw notFound('Указанный отдел');
+  }
+
+  const existing = await prisma.position.findUnique({
+    where: {
+      restaurant_id_name: {
+        restaurant_id: restaurantId,
+        name,
+      },
+    },
+  });
+  if (existing) throw conflict('Должность с таким названием уже существует');
+
+  return prisma.position.create({
+    data: {
+      restaurant_id: restaurantId,
+      department_id: department_id || null,
+      name,
+      order,
+    },
+  });
+};
+
+const updatePosition = async (restaurantId, id, { department_id, name, order }) => {
+  const posWhere = { id };
+  if (restaurantId) posWhere.restaurant_id = restaurantId;
+
+  const pos = await prisma.position.findFirst({
+    where: posWhere,
+  });
+  if (!pos) throw notFound('Должность');
+
+  if (department_id) {
+    const deptWhere = { id: department_id };
+    if (restaurantId) deptWhere.restaurant_id = restaurantId;
+
+    const dept = await prisma.department.findFirst({
+      where: deptWhere,
+    });
+    if (!dept) throw notFound('Указанный отдел');
+  }
+
+  if (name && name !== pos.name) {
+    const existing = await prisma.position.findUnique({
+      where: {
+        restaurant_id_name: {
+          restaurant_id: restaurantId,
+          name,
+        },
+      },
+    });
+    if (existing) throw conflict('Должность с таким названием уже существует');
+  }
+
+  return prisma.position.update({
+    where: { id },
+    data: {
+      name: name !== undefined ? name : pos.name,
+      department_id: department_id !== undefined ? (department_id || null) : pos.department_id,
+      order: order !== undefined ? order : pos.order,
+    },
+  });
+};
+
+const deletePosition = async (restaurantId, id) => {
+  const posWhere = { id };
+  if (restaurantId) posWhere.restaurant_id = restaurantId;
+
+  const pos = await prisma.position.findFirst({
+    where: posWhere,
+  });
+  if (!pos) throw notFound('Должность');
+
+  await prisma.position.delete({ where: { id } });
+  return { message: 'Должность успешно удалена' };
+};
+
+module.exports = {
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getPositions,
+  createPosition,
+  updatePosition,
+  deletePosition,
+};

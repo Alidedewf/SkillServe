@@ -35,7 +35,8 @@ const TestPage = () => {
         if (timeRemaining <= 0) {
             // Если время истекло
             alert('Время теста истекло!');
-            navigate(`/course/${courseID}/results`);
+            navigate(`/course/${courseID}`);
+            return;
         }
 
         const timer = setInterval(() => {

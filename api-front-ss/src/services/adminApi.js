@@ -5,10 +5,15 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
-  return {
+  const headers = {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+  const activeRestaurantId = localStorage.getItem('active_restaurant_id');
+  if (activeRestaurantId) {
+    headers['X-Restaurant-Id'] = activeRestaurantId;
+  }
+  return headers;
 };
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -28,12 +33,12 @@ export const adminLogin = async (email, password) => {
   const data = await res.json();
   const role = String(data.user?.role).toUpperCase();
 
-  if (role !== 'ADMIN') {
+  if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
     throw new Error('Доступ запрещен. Вы не являетесь администратором.');
   }
 
   localStorage.setItem('token', data.token);
-  return { token: data.token, role: 'admin' };
+  return { token: data.token, role: role.toLowerCase() };
 };
 
 export const adminLogout = () => {
@@ -60,7 +65,7 @@ export const isAdminAuthenticated = () => {
     // Проверка на истечение токена (exp в JWT идет в секундах, а Date.now() в мс)
     const isExpired = exp ? (exp * 1000 < Date.now()) : false;
     
-    return role === 'ADMIN' && !isExpired;
+    return (role === 'ADMIN' || role === 'SUPER_ADMIN') && !isExpired;
   } catch (err) {
     console.error('[isAdminAuthenticated] Error decoding token:', err);
     return false;
@@ -315,21 +320,159 @@ export const adminDeleteTest = async (courseId, testId) => {
 // ─── Positions CRUD ──────────────────────────────────────────────────────────
 
 export const adminGetPositions = async () => {
-  return [
-    { id: 'p1', name: 'Официант' },
-    { id: 'p2', name: 'Бармен' },
-    { id: 'p3', name: 'Повар' },
-    { id: 'p4', name: 'Администратор' },
-    { id: 'p5', name: 'Хостес' }
-  ];
+  const res = await fetch(`${API_URL}/org/positions`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка получения должностей');
+  return res.json();
 };
 
-export const adminCreatePosition = async (name) => {
-  return { id: Date.now().toString(), name };
+export const adminCreatePosition = async (name, department_id) => {
+  const res = await fetch(`${API_URL}/org/positions`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name, department_id: department_id || null }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка создания должности');
+  }
+  return res.json();
+};
+
+export const adminUpdatePosition = async (id, data) => {
+  const res = await fetch(`${API_URL}/org/positions/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка обновления должности');
+  }
+  return res.json();
 };
 
 export const adminDeletePosition = async (id) => {
-  return { message: 'OK' };
+  const res = await fetch(`${API_URL}/org/positions/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка удаления должности');
+  return res.json();
+};
+
+// ─── Departments CRUD ────────────────────────────────────────────────────────
+
+export const adminGetDepartments = async () => {
+  const res = await fetch(`${API_URL}/org/departments`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка получения отделов');
+  return res.json();
+};
+
+export const adminCreateDepartment = async (name) => {
+  const res = await fetch(`${API_URL}/org/departments`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка создания отдела');
+  }
+  return res.json();
+};
+
+export const adminUpdateDepartment = async (id, data) => {
+  const res = await fetch(`${API_URL}/org/departments/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка обновления отдела');
+  }
+  return res.json();
+};
+
+export const adminDeleteDepartment = async (id) => {
+  const res = await fetch(`${API_URL}/org/departments/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка удаления отдела');
+  return res.json();
+};
+
+// ─── Restaurants CRUD (SUPER_ADMIN only) ─────────────────────────────────────
+
+export const superAdminGetRestaurants = async () => {
+  const res = await fetch(`${API_URL}/restaurants`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка получения ресторанов');
+  return res.json();
+};
+
+export const superAdminGetRestaurant = async (id) => {
+  const res = await fetch(`${API_URL}/restaurants/${id}`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ресторан не найден');
+  return res.json();
+};
+
+export const superAdminCreateRestaurant = async ({ name, adminEmail, adminPassword, adminName }) => {
+  const res = await fetch(`${API_URL}/restaurants`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name, adminEmail, adminPassword, adminName }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка создания ресторана');
+  }
+  return res.json();
+};
+
+export const superAdminUpdateRestaurant = async (id, data) => {
+  const res = await fetch(`${API_URL}/restaurants/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Ошибка обновления ресторана');
+  }
+  return res.json();
+};
+
+export const superAdminDeleteRestaurant = async (id) => {
+  const res = await fetch(`${API_URL}/restaurants/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Ошибка удаления ресторана');
+  return res.json();
+};
+
+// ─── Helper: get current user role from token ────────────────────────────────
+
+export const getCurrentRole = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(base64));
+    return String(decoded.role).toUpperCase();
+  } catch {
+    return null;
+  }
 };
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
@@ -422,4 +565,29 @@ export const adminGrantAchievement = async (id, user_id) => {
   });
   if (!res.ok) throw new Error('Ошибка выдачи достижения');
   return res.json();
+};
+
+export const isSuperAdminAuthenticated = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+  try {
+    let payloadStr = token;
+    if (token.includes('.')) {
+      payloadStr = token.split('.')[1];
+    }
+    const base64 = payloadStr.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(base64));
+    
+    const role = String(decoded.role).toUpperCase();
+    const exp = decoded.exp;
+    
+    if (role !== 'SUPER_ADMIN') return false;
+    if (exp && Date.now() >= exp * 1000) {
+      localStorage.removeItem('token');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 };

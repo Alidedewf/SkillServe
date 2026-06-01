@@ -1,99 +1,171 @@
 .container {
-    background: linear-gradient(180deg, #006ffd 0%, #fff 100%);
-    min-height: 100vh;
-    padding: 20px;
-  }
-  
-  .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .backButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-right: 10px;
-    margin-top: 5px ;
-  }
-  
-  .title {
-    font-size: 17px;
-    font-weight: bold;
-    color: #fff;
-  }
-  
-  .form {
-    border-radius: 8px;
-    padding-right: 20px;
-  }
-  
-  .formGroup {
-    margin-bottom: 20px;
-  }
-  
-  .formGroup label {
-    display: block;
-    margin-bottom: 8px;
-    color: #71727a;
-  }
-  
-  .formGroup input {
-    width: 92%;
-    padding: 10px;
-    border-radius: 10px;
-    background: #FFF;
-    border: none;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  }
-  
-  .submitButton {
-    width: 100%;
-    background: #006ffd;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .submitButton:hover {
-    background: #005bb5;
-  }
+  background: linear-gradient(180deg, #006ffd 0%, #f8fafc 35%);
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
 
-  .avatarSection {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  
-  .avatarContainer {
-    position: relative;
-  }
-  
-  .avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #006ffd;
-  }
-  
-  .avatarUploadButton {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #006ffd;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-  
-  
-  
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Avatar ─────────────────────────────────── */
+.avatarSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.avatarContainer {
+  position: relative;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.avatarHint {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: #006ffd;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+/* ── Form ───────────────────────────────────── */
+.form {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  font-size: 15px;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus {
+  border-color: #006ffd;
+  background: #fff;
+}
+
+.formGroup input::placeholder {
+  color: #94a3b8;
+}
+
+/* ── Feedback ───────────────────────────────── */
+.errorMsg {
+  font-size: 13px;
+  color: #ef4444;
+  background: #fef2f2;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+}
+
+.successMsg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #10b981;
+  background: #ecfdf5;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+/* ── Submit ─────────────────────────────────── */
+.submitButton {
+  width: 100%;
+  background: #006ffd;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #005bb5;
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Skeleton loader ────────────────────────── */
+.skeleton {
+  height: 200px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

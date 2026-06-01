@@ -1,0 +1,276 @@
+/* ── Page ───────────────────────────────────── */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #006FFD 0%, #f0f4ff 38%);
+    padding-bottom: 80px;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.header {
+    padding: 40px 20px 0;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 20px 0;
+}
+
+/* ── Tabs ───────────────────────────────────── */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tabButton {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.2);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.tabButton:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.activeTab {
+    background: #fff;
+    color: #006ffd;
+    border-color: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+/* ── Content section ────────────────────────── */
+.contentSection {
+    padding: 0 16px;
+}
+
+/* ── Course list ────────────────────────────── */
+.courseList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ── Course Card ────────────────────────────── */
+.courseCard {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+}
+
+.courseCard:active {
+    transform: scale(0.98);
+}
+
+/* ── Card header (image + meta side by side) ── */
+.courseHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px 10px;
+}
+
+.courseImageWrapper {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.courseImageWrapper .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.courseMeta {
+    flex: 1;
+    min-width: 0;
+}
+
+.courseCategory {
+    font-size: 11px;
+    font-weight: 600;
+    color: #006ffd;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.courseTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.courseDescription {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ── Progress section ───────────────────────── */
+.courseProgressSection {
+    padding: 0 14px 4px;
+}
+
+.progressHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.progressLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.progressPercentage {
+    font-size: 12px;
+    font-weight: 700;
+    color: #006ffd;
+}
+
+.courseProgressBar {
+    width: 100%;
+    height: 5px;
+    background: #e8eef8;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.courseProgress {
+    height: 100%;
+    background: linear-gradient(90deg, #006ffd, #3b9eff);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+/* ── Card footer (action button) ────────────── */
+.courseFooter {
+    border-top: 1px solid #f1f5f9;
+    margin-top: 10px;
+}
+
+.courseActionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #006ffd;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    padding: 11px;
+    border-radius: 0 0 16px 16px;
+    transition: background 0.15s;
+}
+
+.courseActionButton:hover {
+    background: #f0f6ff;
+}
+
+.archiveButton {
+    color: #64748b;
+}
+
+/* ── Empty state ────────────────────────────── */
+.noCoursesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    text-align: center;
+}
+
+.noCourses {
+    font-size: 15px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ── Skeleton ───────────────────────────────── */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skeletonCard {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 14px;
+}
+
+.skeletonHeader {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.skeletonImage {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+    animation: shimmer 1.4s infinite;
+}
+
+.skeletonTextWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeletonBar {
+    border-radius: 6px;
+    background: #e2e8f0;
+    animation: shimmer 1.4s infinite;
+}
+
+.skeletonProgressSection {
+    margin-top: 8px;
+}
+
+@keyframes shimmer {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.5; }
+    100% { opacity: 1; }
+}

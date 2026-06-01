@@ -25,6 +25,7 @@ const Dashboard = () => {
           name: data.user.name,
           progress: data.user.progress.percentage,
           avatar: data.user.avatar || avatar,
+          restaurant: data.user.restaurant,
         });
         setAllCourses(data.courses);
       } catch (err) {
@@ -96,7 +97,19 @@ const Dashboard = () => {
       <div className={styles.headerBackground}></div>
       <div className={styles.header}>
         <img src={user ? user.avatar : avatar} alt="Avatar" className={styles.profileAvatar} />
-        <h2 className={styles.profileName}>{user ? user.name : '...'}</h2>
+        <div className={styles.profileInfo}>
+          <h2 className={styles.profileName}>{user ? user.name : '...'}</h2>
+          {user?.restaurant && (
+            <div className={styles.restaurantBadge}>
+              {user.restaurant.logo_url ? (
+                <img src={user.restaurant.logo_url} alt="Logo" className={styles.restaurantMiniLogo} />
+              ) : (
+                <span className={styles.restaurantMiniIcon}>{user.restaurant.name.slice(0, 2).toUpperCase()}</span>
+              )}
+              <span className={styles.restaurantText}>{user.restaurant.name}</span>
+            </div>
+          )}
+        </div>
         <button className={styles.notificationButton} onClick={() => navigate('/notifications')}>
           <FiBell size={24} color="#fff" />
         </button>
@@ -116,12 +129,14 @@ const Dashboard = () => {
                 className={styles.bannerCourseCard}
                 onClick={() => navigate(`/course/${slides[slide].data.id}`)}
               >
-                <div className={styles.bannerCourseImg}>
-                  <img
-                    src={slides[slide].data.image || `https://picsum.photos/seed/${slides[slide].data.id}/80/80`}
-                    alt={slides[slide].data.title}
-                  />
-                </div>
+                {slides[slide].data.image && (
+                  <div className={styles.bannerCourseImg}>
+                    <img
+                      src={slides[slide].data.image}
+                      alt={slides[slide].data.title}
+                    />
+                  </div>
+                )}
                 <div className={styles.bannerCourseInfo}>
                   <p className={styles.bannerCourseTitle}>{slides[slide].data.title}</p>
                   <span className={styles.bannerCoursePct}>{slides[slide].data.progress}%</span>

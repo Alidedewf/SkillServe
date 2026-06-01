@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FiHome, FiBook, FiUsers, FiLogOut, FiAward, FiList } from 'react-icons/fi';
-import { adminLogout } from '../../services/adminApi';
+import { adminLogout, getCurrentRole } from '../../services/adminApi';
 import styles from './AdminLayout.module.css';
 
 const navItems = [
@@ -16,10 +16,22 @@ const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const [adminName, setAdminName] = useState('');
   const [adminInitials, setAdminInitials] = useState('');
+  const [restaurant, setRestaurant] = useState(null);
+  const role = getCurrentRole();
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+  const activeRestaurantName = localStorage.getItem('active_restaurant_name') || 'Ресторан';
 
   const handleLogout = () => {
     adminLogout();
+    localStorage.removeItem('active_restaurant_id');
+    localStorage.removeItem('active_restaurant_name');
     navigate('/login');
+  };
+
+  const handleBackToSaaS = () => {
+    localStorage.removeItem('active_restaurant_id');
+    localStorage.removeItem('active_restaurant_name');
+    navigate('/superadmin');
   };
 
   // Загружаем реальное имя админа из бэкенда
@@ -37,6 +49,10 @@ const AdminLayout = ({ children }) => {
         setAdminName(name);
         const parts = name.split(' ');
         setAdminInitials(parts.map(p => p[0]).join('').toUpperCase().slice(0, 2));
+        
+        if (data.restaurant) {
+          setRestaurant(data.restaurant);
+        }
       } catch (err) {
         console.error('[AdminLayout] Ошибка загрузки профиля:', err);
       }
@@ -50,13 +66,38 @@ const AdminLayout = ({ children }) => {
     return () => document.body.classList.remove('admin-mode');
   }, []);
 
+  const getRestaurantInitials = () => {
+    const name = restaurant?.name || activeRestaurantName;
+    if (!name || name === 'Ресторан') return 'SM';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <div className={styles.wrapper}>
       {/* ─── Top Header ───────────────────────────────────────── */}
       <header className={styles.header}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>SM</div>
+          {restaurant?.logo_url ? (
+            <img src={restaurant.logo_url} className={styles.logoImg} alt={restaurant.name} />
+          ) : (
+            <div className={styles.logoIcon}>{getRestaurantInitials()}</div>
+          )}
         </div>
+
+        {isSuperAdmin && (
+          <div className={styles.impersonationBadge}>
+            <span className={styles.impersonationText} title={activeRestaurantName}>
+              🏠 {activeRestaurantName}
+            </span>
+            <button className={styles.backToSaaSBtn} onClick={handleBackToSaaS} title="Вернуться к управлению SaaS">
+              SaaS Панель
+            </button>
+          </div>
+        )}
 
         <nav className={styles.nav}>
           {navItems.map(({ to, label, icon: Icon, end }) => (

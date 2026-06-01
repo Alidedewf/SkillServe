@@ -33,7 +33,9 @@ const Login = () => {
       const data = await loginUser(email, password);
       localStorage.setItem('token', data.token);
 
-      if (data.user.role === 'ADMIN') {
+      if (data.user.role === 'SUPER_ADMIN') {
+        navigate('/superadmin');
+      } else if (data.user.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate(`/home?lang=${language}`);

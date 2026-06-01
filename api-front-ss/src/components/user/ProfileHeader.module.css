@@ -83,5 +83,49 @@
     font-size: 14px;
     color: #71727a;
     text-align: center;
+    margin: 0;
   }
+
+.restaurantBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  max-width: 200px;
+}
+
+.restaurantMiniLogo {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.restaurantMiniIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.restaurantText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
   

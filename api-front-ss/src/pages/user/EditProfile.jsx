@@ -1,137 +1,146 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './EditProfile.module.css';
-import { FiArrowLeft, FiCamera } from 'react-icons/fi';
-import AvatarPlaceholder from '../../assets/images/avatar.svg'; 
+import { FiArrowLeft, FiCamera, FiCheck } from 'react-icons/fi';
+import { fetchUserProfile, updateUserProfile } from '../../services/api';
 
 const EditProfile = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    first_name: 'Аknur',
-    last_name: 'Oraz',
-    phone: '+7 706 666 77 77',
-    email: 'aorazbai@gmail.com',
-    avatar: null,
+    name: '',
+    avatar_url: '',
   });
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
-  const handleBackClick = () => {
-    navigate('/profile');
-  };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await fetchUserProfile();
+        setFormData({
+          name: data.name || '',
+          avatar_url: data.avatar_url || '',
+        });
+        setAvatarPreview(
+          data.avatar_url ||
+            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}&backgroundColor=b6e3f4,c0aede`
+        );
+      } catch (err) {
+        setError('Не удалось загрузить профиль');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFormData((prevData) => ({
-          ...prevData,
-          avatar: reader.result, // Сохраняем превью аватарки
-        }));
-      };
-      reader.readAsDataURL(file);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'avatar_url' && value.trim()) {
+      setAvatarPreview(value.trim());
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      setError('Имя не может быть пустым');
+      return;
+    }
+    setSaving(true);
+    setError('');
     try {
-      const response = await fetch('http://89.35.124.3:8080/api/update-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await updateUserProfile({
+        name: formData.name.trim(),
+        avatar_url: formData.avatar_url.trim() || null,
       });
-      const data = await response.json();
-      if (data.status === 'profile updated') {
-        alert('Профиль успешно обновлён');
-        navigate('/profile');
-      } else {
-        alert('Ошибка обновления профиля');
-      }
-    } catch (error) {
-      alert('Ошибка подключения к серверу');
+      setSuccess(true);
+      setTimeout(() => navigate('/profile'), 1200);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <button onClick={() => navigate('/profile')} className={styles.backButton}>
+            <FiArrowLeft size={24} color="#fff" />
+          </button>
+          <h1 className={styles.title}>Редактировать профиль</h1>
+        </div>
+        <div className={styles.skeleton} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button onClick={handleBackClick} className={styles.backButton}>
+        <button onClick={() => navigate('/profile')} className={styles.backButton}>
           <FiArrowLeft size={24} color="#fff" />
         </button>
-        <h1 className={styles.title}>Изменить профиль</h1>
+        <h1 className={styles.title}>Редактировать профиль</h1>
       </div>
+
       <div className={styles.avatarSection}>
         <div className={styles.avatarContainer}>
           <img
-            src={formData.avatar || AvatarPlaceholder}
+            src={avatarPreview}
             alt="Аватар"
             className={styles.avatar}
+            onError={(e) => {
+              e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=fallback&backgroundColor=b6e3f4`;
+            }}
           />
-          <label htmlFor="avatar-upload" className={styles.avatarUploadButton}>
-            <input
-              type="file"
-              id="avatar-upload"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              style={{ display: 'none' }}
-            />
-            <FiCamera size={20} color="#fff" />
-          </label>
+          <div className={styles.avatarHint}>
+            <FiCamera size={14} />
+          </div>
         </div>
       </div>
+
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="first_name">Имя</label>
+          <label htmlFor="name">Имя</label>
           <input
             type="text"
-            id="first_name"
-            name="first_name"
-            value={formData.first_name}
+            id="name"
+            name="name"
+            value={formData.name}
             onChange={handleInputChange}
+            placeholder="Ваше имя"
           />
         </div>
+
         <div className={styles.formGroup}>
-          <label htmlFor="last_name">Фамилия</label>
+          <label htmlFor="avatar_url">Ссылка на аватар (URL)</label>
           <input
-            type="text"
-            id="last_name"
-            name="last_name"
-            value={formData.last_name}
+            type="url"
+            id="avatar_url"
+            name="avatar_url"
+            value={formData.avatar_url}
             onChange={handleInputChange}
+            placeholder="https://example.com/photo.jpg"
           />
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="phone">Номер телефона</label>
-          <input
-            type="text"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="email">Электронная почта</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-          />
-        </div>
-        <button type="submit" className={styles.submitButton}>
-          Сохранить изменения
+
+        {error && <p className={styles.errorMsg}>{error}</p>}
+
+        {success && (
+          <div className={styles.successMsg}>
+            <FiCheck size={16} /> Сохранено!
+          </div>
+        )}
+
+        <button type="submit" className={styles.submitButton} disabled={saving || success}>
+          {saving ? 'Сохранение...' : success ? 'Сохранено ✓' : 'Сохранить изменения'}
         </button>
       </form>
     </div>
