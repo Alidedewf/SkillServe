@@ -419,6 +419,16 @@ const createUser = async (restaurantId, { first_name, last_name, email, password
     include: { position: true },
   });
 
+  // Создаём приветственное уведомление
+  await prisma.notification.create({
+    data: {
+      user_id: user.id,
+      restaurant_id: restaurantId,
+      title: 'Добро пожаловать!',
+      message: `Привет, ${fullName}! Ваш аккаунт успешно создан. Начните обучение в разделе «Курсы».`,
+    },
+  });
+
   return {
     id: user.id,
     first_name,
@@ -430,6 +440,7 @@ const createUser = async (restaurantId, { first_name, last_name, email, password
     is_active: true,
     created_at: user.created_at,
   };
+
 };
 
 const updateUser = async (restaurantId, userId, { first_name, last_name, email, password, role, position }) => {

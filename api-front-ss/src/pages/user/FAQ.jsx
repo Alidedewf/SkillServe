@@ -1,79 +1,72 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FAQ.module.css';
-import { FiArrowLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown } from 'react-icons/fi';
+
+const FAQS = [
+  {
+    id: 1,
+    question: 'Как начать курс?',
+    answer: 'Перейдите в раздел «Курсы», выберите нужный курс и нажмите кнопку «Начать обучение». Система сохраняет ваш прогресс автоматически.',
+  },
+  {
+    id: 2,
+    question: 'Как сдать тест?',
+    answer: 'После прохождения всех уроков курса откроется тест. Выберите правильные ответы и нажмите «Завершить тест». Результат появится сразу.',
+  },
+  {
+    id: 3,
+    question: 'Как изменить язык интерфейса?',
+    answer: 'Перейдите в «Профиль» → «Редактировать профиль» и выберите нужный язык в поле «Язык». Изменения применяются сразу.',
+  },
+  {
+    id: 4,
+    question: 'Что такое XP и рейтинг?',
+    answer: 'XP (опыт) начисляется за прохождение тестов. Чем правильнее вы отвечаете, тем больше очков. Рейтинг показывает лучших сотрудников вашего заведения.',
+  },
+  {
+    id: 5,
+    question: 'Где посмотреть меню заведения?',
+    answer: 'Раздел «Меню» в нижней навигации. Там доступны категории блюд и напитков, а также PDF-версия официального меню, если она загружена.',
+  },
+  {
+    id: 6,
+    question: 'Как получить сертификат?',
+    answer: 'Сертификат выдаётся автоматически после успешного прохождения курса (все уроки + тест). Посмотреть их можно в разделе «Профиль» → «Сертификаты».',
+  },
+  {
+    id: 7,
+    question: 'Как связаться с администратором?',
+    answer: 'Обратитесь к вашему менеджеру или администратору заведения. В приложении встроенного чата нет.',
+  },
+];
 
 const FAQ = () => {
   const navigate = useNavigate();
-  const [faqs, setFaqs] = useState([]);
-  const [activeQuestion, setActiveQuestion] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [activeId, setActiveId] = useState(null);
 
-  useEffect(() => {
-    const fetchFaqs = async () => {
-      try {
-        const response = await fetch('/user/profile/faq/', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Добавляем токен из localStorage
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Ошибка загрузки данных');
-        }
-
-        const data = await response.json();
-        setFaqs(data);
-      } catch (error) {
-        console.error('Ошибка при загрузке FAQ:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFaqs();
-  }, []);
-
-  const handleBackClick = () => {
-    navigate(-1); // Возвращение на предыдущую страницу
-  };
-
-  const toggleQuestion = (id) => {
-    setActiveQuestion((prev) => (prev === id ? null : id));
-  };
-
-  if (loading) {
-    return <p className={styles.loading}>Загрузка...</p>;
-  }
+  const toggle = (id) => setActiveId((prev) => (prev === id ? null : id));
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button onClick={handleBackClick} className={styles.backButton}>
+        <button onClick={() => navigate(-1)} className={styles.backButton}>
           <FiArrowLeft size={24} color="#fff" />
         </button>
-        <h3 className={styles.title} onClick={handleBackClick}>
-          FAQ
-        </h3>
+        <h3 className={styles.title}>FAQ</h3>
       </div>
+
       <div className={styles.faqList}>
-        {faqs.map((faq) => (
+        {FAQS.map((faq) => (
           <div key={faq.id} className={styles.faqItem}>
-            <div
-              className={styles.question}
-              onClick={() => toggleQuestion(faq.id)}
-            >
+            <div className={styles.question} onClick={() => toggle(faq.id)}>
               <span>{faq.question}</span>
-              <FiChevronRight
-                size={24}
-                className={`${styles.arrow} ${
-                  activeQuestion === faq.id ? styles.rotatedArrow : ''
-                }`}
+              <FiChevronDown
+                size={20}
+                className={`${styles.arrow} ${activeId === faq.id ? styles.rotatedArrow : ''}`}
               />
             </div>
-            {activeQuestion === faq.id && (
+            {activeId === faq.id && (
               <div className={styles.answer}>{faq.answer}</div>
             )}
           </div>

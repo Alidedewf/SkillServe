@@ -113,6 +113,7 @@ model User {
   lessonProgress UserLessonProgress[]
   testAttempts   TestAttempt[]
   achievements   UserAchievement[]
+  notifications  Notification[]
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -293,3 +294,21 @@ model RestaurantSetting {
 
   @@unique([restaurant_id, key])
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// УВЕДОМЛЕНИЯ
+// ─────────────────────────────────────────────────────────────────────
+model Notification {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  restaurant_id Int?
+  title         String
+  message       String
+  is_read       Boolean  @default(false)
+  created_at    DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+

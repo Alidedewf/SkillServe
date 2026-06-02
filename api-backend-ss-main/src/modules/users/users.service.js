@@ -81,17 +81,28 @@ const updateProfile = async (userId, { name, language, avatar_url, position_id }
 };
 
 const getNotifications = async (userId, restaurantId) => {
-  // В старой системе возвращался хардкод заглушка. Сохраним поведение, но вернем его в сервисе.
-  return [
-    {
-      id: 1,
-      title: 'Добро пожаловать!',
-      message: 'Добро пожаловать в StaffMenu! Обучение теперь работает полностью на реальном API бэкенде.',
-      is_read: false,
-      created_at: new Date().toISOString(),
-    },
-  ];
+  const notifications = await prisma.notification.findMany({
+    where: { user_id: userId },
+    orderBy: { created_at: 'desc' },
+    take: 50,
+  });
+
+  // Если уведомлений нет — создаём приветственное один раз
+  if (notifications.length === 0) {
+    const welcome = await prisma.notification.create({
+      data: {
+        user_id: userId,
+        restaurant_id: restaurantId || null,
+        title: 'Добро пожаловать!',
+        message: 'Добро пожаловать в SkillServe! Начните обучение в разделе «Курсы».',
+      },
+    });
+    return [welcome];
+  }
+
+  return notifications;
 };
+
 
 module.exports = {
   getProfile,

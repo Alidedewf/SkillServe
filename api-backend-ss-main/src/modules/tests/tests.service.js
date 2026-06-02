@@ -123,6 +123,22 @@ const submitTest = async (userId, testId, restaurantId, answers) => {
     }
   }
 
+  // Если тест сдан — отправляем уведомление о завершении курса
+  if (isPassed && test.course_id) {
+    const course = await prisma.course.findUnique({
+      where: { id: test.course_id },
+      select: { title: true },
+    });
+    await prisma.notification.create({
+      data: {
+        user_id: userId,
+        restaurant_id: restaurantId || null,
+        title: '🎓 Курс завершён!',
+        message: `Вы успешно прошли курс «${course?.title || 'Курс'}». Сертификат доступен в вашем профиле.`,
+      },
+    }).catch(() => {}); // не блокируем основной ответ при ошибке
+  }
+
   return {
     correct_count,
     total_questions,
@@ -132,6 +148,7 @@ const submitTest = async (userId, testId, restaurantId, answers) => {
       questions: questionsResult,
     },
   };
+
 };
 
 module.exports = {
