@@ -38,32 +38,38 @@ import SuperAdminRestaurants from './pages/admin/SuperAdminRestaurants';
 import MenuPage from './pages/user/MenuPage';
 import NotFound from './pages/user/NotFound';
 
+import ProtectedRoute from './components/user/ProtectedRoute';
+import PublicRoute from './components/user/PublicRoute';
+
 const App = () => {
   return (
       <Router>
         <AnimatePresence>
           <Routes>
-            <Route path="/" element={<LanguageSelection />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify-code" element={<VerifyCode />} />
-            <Route path="/courses" element={<Course />} />
-            <Route path="/course/:id" element={<CourseLessonsPage />} />
-            <Route path="/course/:courseID/lessons/:lessonID" element={<LessonPage />} />
-            <Route path="/course/:courseID/test/:testID" element={<TestPage />} />
-            <Route path="/course/:courseID/test/:testID/results" element={<TestResultsPage />} />
+            {/* Публичные маршруты (доступны только гостям) */}
+            <Route path="/" element={<PublicRoute><LanguageSelection /></PublicRoute>} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+            <Route path="/verify-code" element={<PublicRoute><VerifyCode /></PublicRoute>} />
 
-            <Route path="/archived-courses" element={<ArchivedCourses />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/certificates" element={<Certificates />} />
-            <Route path="/rating" element={<Rating />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/menu" element={<MenuPage />} />
+            {/* Приватные пользовательские маршруты (доступны только авторизованным) */}
+            <Route path="/courses" element={<ProtectedRoute><Course /></ProtectedRoute>} />
+            <Route path="/course/:id" element={<ProtectedRoute><CourseLessonsPage /></ProtectedRoute>} />
+            <Route path="/course/:courseID/lessons/:lessonID" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
+            <Route path="/course/:courseID/test/:testID" element={<ProtectedRoute><TestPage /></ProtectedRoute>} />
+            <Route path="/course/:courseID/test/:testID/results" element={<ProtectedRoute><TestResultsPage /></ProtectedRoute>} />
+
+            <Route path="/archived-courses" element={<ProtectedRoute><ArchivedCourses /></ProtectedRoute>} />
+            <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+            <Route path="/rating" element={<ProtectedRoute><Rating /></ProtectedRoute>} />
+            <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+            <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+            <Route path="/faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
+            <Route path="/menu" element={<ProtectedRoute><MenuPage /></ProtectedRoute>} />
 
             {/* Admin routes — доступ только при role: 'admin' в токене */}
             <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />

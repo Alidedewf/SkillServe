@@ -8,6 +8,21 @@ const NotFound = () => {
   const navigate = useNavigate();
   const lang = localStorage.getItem('lang') || 'ru';
   const t = translations[lang] || translations.ru;
+  const token = localStorage.getItem('token');
+
+  const handleBackClick = () => {
+    if (token) {
+      if (window.history.state && window.history.state.idx > 0) {
+        navigate(-1);
+      } else {
+        navigate('/home');
+      }
+    } else {
+      navigate(`/login?lang=${lang}`);
+    }
+  };
+
+  const buttonText = token ? t.goHome : (lang === 'kz' ? 'Кіру' : 'Войти');
 
   return (
     <div className={styles.container}>
@@ -38,9 +53,9 @@ const NotFound = () => {
           className={styles.backButton}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/home')}
+          onClick={handleBackClick}
         >
-          {t.goHome}
+          {buttonText}
         </motion.button>
       </motion.div>
     </div>

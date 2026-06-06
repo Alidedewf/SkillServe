@@ -19,18 +19,11 @@ prisma.$on('error', (e) => {
 });
 
 
-// Логирование времени выполнения каждого Prisma-запроса (для диагностики)
+// Обработка повторных попыток при разрыве соединения Neon
 prisma.$use(async (params, next) => {
   const start = Date.now();
   try {
-    const result = await next(params);
-    const duration = Date.now() - start;
-    if (duration > 100) {
-      console.warn(`⚠️  [Prisma SLOW] ${params.model}.${params.action} — ${duration}ms`);
-    } else {
-      console.log(`[Prisma] ${params.model}.${params.action} — ${duration}ms`);
-    }
-    return result;
+    return await next(params);
   } catch (err) {
     const duration = Date.now() - start;
     console.error(`❌ [Prisma ERROR] ${params.model}.${params.action} — ${duration}ms:`, err.message);
