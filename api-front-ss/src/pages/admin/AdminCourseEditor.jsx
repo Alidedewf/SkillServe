@@ -316,9 +316,11 @@ const AdminCourseEditor = () => {
 
   if (loading) {
     return (
-      <div className={styles.page}>
-        <div className={styles.emptyState}><h3>Загрузка редактора курса...</h3></div>
-      </div>
+      <AdminLayout>
+        <div className={styles.page}>
+          <div className={styles.emptyState}><h3>Загрузка редактора курса...</h3></div>
+        </div>
+      </AdminLayout>
     );
   }
 
