@@ -1,23 +1,29 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import styles from './ProfileHeader.module.css';
 import { FiBell, FiEdit2 } from 'react-icons/fi';
 import avatarPlaceholder from '../../assets/images/default-avatar.svg';
 
 const ProfileHeader = ({ user }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleNotificationsClick = () => {
-      navigate('/notifications');
-    };
+  const handleNotificationsClick = () => {
+    navigate('/notifications');
+  };
 
-    const handleEditProfileClick = () => {
-        navigate('/edit-profile'); 
-      };
+  const handleEditProfileClick = () => {
+    navigate('/edit-profile');
+  };
 
   return (
     <div className={styles.header}>
-      <h1 className={styles.title}>Профиль</h1>
+      <div className={styles.topContainer}>
+        <h1 className={styles.title}>Профиль</h1>
+        <button className={styles.notificationButton}
+          onClick={handleNotificationsClick}>
+          <FiBell size={24} className={styles.notification} />
+        </button>
+      </div>
       <div className={styles.profileContainer}>
         <div className={styles.avatarContainer}>
           <img
@@ -25,9 +31,9 @@ const ProfileHeader = ({ user }) => {
             alt="Аватар"
             className={styles.avatar}
           />
-          <button 
-          className={styles.editButton} 
-          onClick={handleEditProfileClick} >
+          <button
+            className={styles.editButton}
+            onClick={handleEditProfileClick} >
             <FiEdit2 size={16} color="#fff" />
           </button>
         </div>
@@ -44,10 +50,7 @@ const ProfileHeader = ({ user }) => {
           </div>
         )}
       </div>
-      <button className={styles.notificationButton}
-      onClick={handleNotificationsClick}>
-        <FiBell size={24} className={styles.notification} />
-      </button>
+
     </div>
   );
 };
