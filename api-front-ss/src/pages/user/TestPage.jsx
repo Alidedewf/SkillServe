@@ -121,7 +121,7 @@ const TestPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <button onClick={() => navigate(-1)} className={styles.closeButton}>
+                <button onClick={() => navigate(`/course/${courseID}`)} className={styles.closeButton}>
                     ✕
                 </button>
                 <div className={styles.progress}>

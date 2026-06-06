@@ -129,4 +129,18 @@
   .retryButton:hover {
     background-color: #0056cc;
   }
+
+  .grayMedal {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+
+  .resultTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+
   
