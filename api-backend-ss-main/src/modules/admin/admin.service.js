@@ -234,19 +234,24 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
   if (!existingCourse) throw notFound('Курс');
 
   return prisma.$transaction(async (tx) => {
-    await tx.course.update({
-      where: { id: courseId },
-      data: {
-        title,
-        description,
-        category,
-        image_url,
-        status: is_published ? 'ACTIVE' : 'ARCHIVED',
-      },
-    });
+    // Обновляем только те поля курса, которые реально переданы
+    const courseData = {};
+    if (title !== undefined) courseData.title = title;
+    if (description !== undefined) courseData.description = description;
+    if (category !== undefined) courseData.category = category;
+    if (image_url !== undefined) courseData.image_url = image_url;
+    if (is_published !== undefined) courseData.status = is_published ? 'ACTIVE' : 'ARCHIVED';
 
-    await tx.lesson.deleteMany({ where: { course_id: courseId } });
-    if (lessons && Array.isArray(lessons)) {
+    if (Object.keys(courseData).length > 0) {
+      await tx.course.update({
+        where: { id: courseId },
+        data: courseData,
+      });
+    }
+
+    // Пересоздаём уроки ТОЛЬКО если они явно переданы в payload
+    if (lessons !== undefined && Array.isArray(lessons)) {
+      await tx.lesson.deleteMany({ where: { course_id: courseId } });
       for (let i = 0; i < lessons.length; i++) {
         const l = lessons[i];
         await tx.lesson.create({
@@ -261,7 +266,8 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
       }
     }
 
-    if (tests && Array.isArray(tests)) {
+    // Пересоздаём тесты ТОЛЬКО если они явно переданы в payload
+    if (tests !== undefined && Array.isArray(tests)) {
       const activeTestIds = [];
 
       for (const t of tests) {
@@ -316,9 +322,8 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
           id: { notIn: activeTestIds },
         },
       });
-    } else {
-      await tx.test.deleteMany({ where: { course_id: courseId } });
     }
+    // Если tests не передан — не трогаем существующие тесты
 
     return { id: courseId, message: 'Курс успешно обновлен' };
   });
