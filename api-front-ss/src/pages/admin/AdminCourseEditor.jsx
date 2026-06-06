@@ -4,7 +4,6 @@ import { FiArrowLeft, FiSave, FiPlus, FiTrash2, FiBookOpen, FiSettings, FiCheckS
 import {
   adminGetCourse,
   adminUpdateCourse,
-  adminCreateCourse,
   adminGetPositions,
 } from '../../services/adminApi';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -13,7 +12,6 @@ import styles from './AdminCourseEditor.module.css';
 const AdminCourseEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isNew = id === 'new';
 
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
@@ -46,20 +44,18 @@ const AdminCourseEditor = () => {
         const positions = await adminGetPositions();
         setAllPositions(positions || []);
 
-        if (!isNew) {
-          const course = await adminGetCourse(id);
-          setTitle(course.title || '');
-          setDescription(course.description || '');
-          setCategory(course.category || 'Сервис');
-          setImageUrl(course.image_url || '');
-          setSpecialty(course.specialty || '');
-          setLessons(course.lessons || []);
-          setTests(course.tests || []);
+        const course = await adminGetCourse(id);
+        setTitle(course.title || '');
+        setDescription(course.description || '');
+        setCategory(course.category || 'Сервис');
+        setImageUrl(course.image_url || '');
+        setSpecialty(course.specialty || '');
+        setLessons(course.lessons || []);
+        setTests(course.tests || []);
 
-          // Parse selected positions from specialty
-          const specList = course.specialty ? course.specialty.split(',').map(s => s.trim()) : [];
-          setSelectedPositions(specList);
-        }
+        // Parse selected positions from specialty
+        const specList = course.specialty ? course.specialty.split(',').map(s => s.trim()) : [];
+        setSelectedPositions(specList);
       } catch (err) {
         console.error('[AdminCourseEditor Load Error]', err);
       } finally {
@@ -67,7 +63,7 @@ const AdminCourseEditor = () => {
       }
     };
     init();
-  }, [id, isNew]);
+  }, [id]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -86,11 +82,7 @@ const AdminCourseEditor = () => {
         tests,
       };
 
-      if (isNew) {
-        await adminCreateCourse(payload);
-      } else {
-        await adminUpdateCourse(id, payload);
-      }
+      await adminUpdateCourse(id, payload);
       navigate('/admin/courses');
     } catch (err) {
       console.error('[Save Error]', err);
@@ -337,7 +329,7 @@ const AdminCourseEditor = () => {
             <FiArrowLeft size={18} /> Назад
           </button>
           <h1 className={styles.courseTitleHeader}>
-            {isNew ? 'Создание нового курса' : `Редактирование: ${title || 'Курс без названия'}`}
+            Редактирование: {title || 'Курс без названия'}
           </h1>
         </div>
         <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>

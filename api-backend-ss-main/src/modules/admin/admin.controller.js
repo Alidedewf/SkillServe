@@ -1,169 +1,89 @@
 const adminService = require('./admin.service');
+const asyncHandler = require('../../common/utils/asyncHandler');
 
-const getStats = async (req, res) => {
-  try {
-    const stats = await adminService.getStats(req.restaurantId);
-    res.json(stats);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.getStats]', err);
-    res.status(500).json({ error: 'Ошибка получения статистики' });
-  }
-};
+const getStats = asyncHandler(
+  (req) => adminService.getStats(req.restaurantId),
+  'Ошибка получения статистики'
+);
 
-const getCourses = async (req, res) => {
-  try {
-    const courses = await adminService.getCourses(req.restaurantId);
-    res.json(courses);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.getCourses]', err);
-    res.status(500).json({ error: 'Ошибка получения курсов' });
-  }
-};
+const getCourses = asyncHandler(
+  (req) => adminService.getCourses(req.restaurantId),
+  'Ошибка получения курсов'
+);
 
-const getCourseById = async (req, res) => {
-  try {
-    const course = await adminService.getCourseById(req.restaurantId, parseInt(req.params.id));
-    res.json(course);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.getCourseById]', err);
-    res.status(500).json({ error: 'Ошибка получения данных курса' });
-  }
-};
+const getCourseById = asyncHandler(
+  (req) => adminService.getCourseById(req.restaurantId, parseInt(req.params.id)),
+  'Ошибка получения данных курса'
+);
 
-const createCourse = async (req, res) => {
-  try {
+const createCourse = asyncHandler(
+  async (req, res) => {
     const result = await adminService.createCourse(req.restaurantId, req.body);
     res.status(201).json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.createCourse]', err);
-    res.status(500).json({ error: 'Ошибка создания курса в БД' });
-  }
-};
+  },
+  'Ошибка создания курса в БД'
+);
 
-const updateCourse = async (req, res) => {
-  try {
-    const result = await adminService.updateCourse(req.restaurantId, parseInt(req.params.id), req.body);
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.updateCourse]', err);
-    res.status(500).json({ error: 'Ошибка обновления курса в БД' });
-  }
-};
+const updateCourse = asyncHandler(
+  (req) => adminService.updateCourse(req.restaurantId, parseInt(req.params.id), req.body),
+  'Ошибка обновления курса в БД'
+);
 
-const deleteCourse = async (req, res) => {
-  try {
-    const result = await adminService.deleteCourse(req.restaurantId, parseInt(req.params.id));
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.deleteCourse]', err);
-    res.status(500).json({ error: 'Ошибка удаления курса' });
-  }
-};
+const deleteCourse = asyncHandler(
+  (req) => adminService.deleteCourse(req.restaurantId, parseInt(req.params.id)),
+  'Ошибка удаления курса'
+);
 
-const getUsers = async (req, res) => {
-  try {
-    const users = await adminService.getUsers(req.restaurantId);
-    res.json(users);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.getUsers]', err);
-    res.status(500).json({ error: 'Ошибка получения пользователей' });
-  }
-};
+const getUsers = asyncHandler(
+  (req) => adminService.getUsers(req.restaurantId),
+  'Ошибка получения пользователей'
+);
 
-const createUser = async (req, res) => {
-  try {
+const createUser = asyncHandler(
+  async (req, res) => {
     const user = await adminService.createUser(req.restaurantId, req.body);
     res.status(201).json(user);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.createUser]', err);
-    res.status(500).json({ error: 'Ошибка создания пользователя' });
-  }
-};
+  },
+  'Ошибка создания пользователя'
+);
 
-const updateUser = async (req, res) => {
-  try {
-    const user = await adminService.updateUser(req.restaurantId, parseInt(req.params.id), req.body);
-    res.json(user);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.updateUser]', err);
-    res.status(500).json({ error: 'Ошибка обновления пользователя' });
-  }
-};
+const updateUser = asyncHandler(
+  (req) => adminService.updateUser(req.restaurantId, parseInt(req.params.id), req.body),
+  'Ошибка обновления пользователя'
+);
 
-const deleteUser = async (req, res) => {
-  try {
-    const result = await adminService.deleteUser(req.restaurantId, parseInt(req.params.id));
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.deleteUser]', err);
-    res.status(500).json({ error: 'Ошибка удаления пользователя' });
-  }
-};
+const deleteUser = asyncHandler(
+  (req) => adminService.deleteUser(req.restaurantId, parseInt(req.params.id)),
+  'Ошибка удаления пользователя'
+);
 
-const getAchievements = async (req, res) => {
-  try {
-    const achievements = await adminService.getAchievements(req.restaurantId);
-    res.json(achievements);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.getAchievements]', err);
-    res.status(500).json({ error: 'Ошибка получения достижений' });
-  }
-};
+const getAchievements = asyncHandler(
+  (req) => adminService.getAchievements(req.restaurantId),
+  'Ошибка получения достижений'
+);
 
-const createAchievement = async (req, res) => {
-  try {
+const createAchievement = asyncHandler(
+  async (req, res) => {
     const achievement = await adminService.createAchievement(req.restaurantId, req.body);
     res.status(201).json(achievement);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.createAchievement]', err);
-    res.status(500).json({ error: 'Ошибка создания достижения' });
-  }
-};
+  },
+  'Ошибка создания достижения'
+);
 
-const updateAchievement = async (req, res) => {
-  try {
-    const achievement = await adminService.updateAchievement(req.restaurantId, parseInt(req.params.id), req.body);
-    res.json(achievement);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.updateAchievement]', err);
-    res.status(500).json({ error: 'Ошибка обновления достижения' });
-  }
-};
+const updateAchievement = asyncHandler(
+  (req) => adminService.updateAchievement(req.restaurantId, parseInt(req.params.id), req.body),
+  'Ошибка обновления достижения'
+);
 
-const deleteAchievement = async (req, res) => {
-  try {
-    const result = await adminService.deleteAchievement(req.restaurantId, parseInt(req.params.id));
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.deleteAchievement]', err);
-    res.status(500).json({ error: 'Ошибка удаления достижения' });
-  }
-};
+const deleteAchievement = asyncHandler(
+  (req) => adminService.deleteAchievement(req.restaurantId, parseInt(req.params.id)),
+  'Ошибка удаления достижения'
+);
 
-const grantAchievement = async (req, res) => {
-  try {
-    const result = await adminService.grantAchievement(req.restaurantId, parseInt(req.params.id), req.body);
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[admin.grantAchievement]', err);
-    res.status(500).json({ error: 'Ошибка выдачи достижения' });
-  }
-};
+const grantAchievement = asyncHandler(
+  (req) => adminService.grantAchievement(req.restaurantId, parseInt(req.params.id), req.body),
+  'Ошибка выдачи достижения'
+);
 
 module.exports = {
   getStats,
@@ -182,3 +102,4 @@ module.exports = {
   deleteAchievement,
   grantAchievement,
 };
+

@@ -5,39 +5,34 @@ const getCourses = async (userId, restaurantId) => {
   const where = { status: 'ACTIVE' };
   if (restaurantId) where.restaurant_id = restaurantId;
 
-  const courses = await prisma.course.findMany({
-    where,
-    include: {
-      lessons: {
-        select: { id: true },
+  const [courses, progresses] = await Promise.all([
+    prisma.course.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        image_url: true,
       },
-    },
-  });
+    }),
+    prisma.userCourseProgress.findMany({
+      where: { user_id: userId },
+      select: { course_id: true, progress: true },
+    }),
+  ]);
 
-  const formattedCourses = await Promise.all(
-    courses.map(async (course) => {
-      const progress = await prisma.userCourseProgress.findUnique({
-        where: {
-          user_id_course_id: {
-            user_id: userId,
-            course_id: course.id,
-          },
-        },
-      });
+  const progressMap = new Map(progresses.map(p => [p.course_id, p.progress]));
 
-      return {
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        category: course.category,
-        image: course.image_url,
-        image_url: course.image_url,
-        progress: progress ? progress.progress : 0,
-      };
-    })
-  );
-
-  return formattedCourses;
+  return courses.map((course) => ({
+    id: course.id,
+    title: course.title,
+    description: course.description,
+    category: course.category,
+    image: course.image_url,
+    image_url: course.image_url,
+    progress: progressMap.get(course.id) || 0,
+  }));
 };
 
 const getInProgress = async (userId, restaurantId) => {
@@ -68,30 +63,31 @@ const getNewCourses = async (userId, restaurantId) => {
   const courseWhere = { status: 'ACTIVE' };
   if (restaurantId) courseWhere.restaurant_id = restaurantId;
 
-  const allCourses = await prisma.course.findMany({
-    where: courseWhere,
-  });
-  
   const courseFilter = restaurantId ? { restaurant_id: restaurantId } : {};
-  const progresses = await prisma.userCourseProgress.findMany({
-    where: {
-      user_id: userId,
-      course: courseFilter,
-    },
-  });
 
-  const startedCourseIds = progresses.filter((p) => p.progress > 0).map((p) => p.course_id);
-  const newCourses = allCourses.filter((c) => !startedCourseIds.includes(c.id));
+  const [allCourses, progresses] = await Promise.all([
+    prisma.course.findMany({ where: courseWhere }),
+    prisma.userCourseProgress.findMany({
+      where: { user_id: userId, course: courseFilter },
+      select: { course_id: true, progress: true },
+    }),
+  ]);
 
-  return newCourses.map((c) => ({
-    id: c.id,
-    title: c.title,
-    description: c.description,
-    category: c.category,
-    image: c.image_url,
-    image_url: c.image_url,
-    progress: 0,
-  }));
+  const startedCourseIds = new Set(
+    progresses.filter((p) => p.progress > 0).map((p) => p.course_id)
+  );
+
+  return allCourses
+    .filter((c) => !startedCourseIds.has(c.id))
+    .map((c) => ({
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      category: c.category,
+      image: c.image_url,
+      image_url: c.image_url,
+      progress: 0,
+    }));
 };
 
 const getArchived = async (userId, restaurantId) => {

@@ -31,6 +31,9 @@ const translations = {
         language: 'Язык',
         changePassword: 'Поменять пароль',
         faq: 'FAQ',
+        notFoundTitle: 'Страница не найдена',
+        notFoundDesc: 'К сожалению, запрашиваемая страница не существует или была перенесена.',
+        goHome: 'На главную',
     },
     kz: {
         welcome: 'Қош келдіңіз!',
@@ -62,6 +65,9 @@ const translations = {
         language: 'Тіл',
         changePassword: 'Құпия сөзді өзгерту',
         faq: 'FAQ',
+        notFoundTitle: 'Бет табылмады',
+        notFoundDesc: 'Өкінішке орай, сұралған бет жоқ немесе басқа жерге ауыстырылған.',
+        goHome: 'Басты бетке',
     },
 };
 

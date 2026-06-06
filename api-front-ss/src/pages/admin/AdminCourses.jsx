@@ -85,7 +85,10 @@ const AdminCourses = () => {
       {showCreateModal && (
         <CourseCreateModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); load(); }}
+          onCreated={(courseId) => {
+            setShowCreateModal(false);
+            navigate(`/admin/courses/${courseId}`);
+          }}
         />
       )}
       {showAIModal && (

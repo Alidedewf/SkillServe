@@ -19,12 +19,22 @@ prisma.$on('error', (e) => {
 });
 
 
-// Автоматический реконнект при обрыве соединения Neon (E57P01 — admin_shutdown)
-// Neon serverless убивает idle-соединения, поэтому при следующем запросе нужно переподключиться
+// Логирование времени выполнения каждого Prisma-запроса (для диагностики)
 prisma.$use(async (params, next) => {
+  const start = Date.now();
   try {
-    return await next(params);
+    const result = await next(params);
+    const duration = Date.now() - start;
+    if (duration > 100) {
+      console.warn(`⚠️  [Prisma SLOW] ${params.model}.${params.action} — ${duration}ms`);
+    } else {
+      console.log(`[Prisma] ${params.model}.${params.action} — ${duration}ms`);
+    }
+    return result;
   } catch (err) {
+    const duration = Date.now() - start;
+    console.error(`❌ [Prisma ERROR] ${params.model}.${params.action} — ${duration}ms:`, err.message);
+
     const isNeonDisconnect =
       err?.message?.includes('terminating connection') ||
       err?.message?.includes('Connection pool timeout') ||
@@ -33,14 +43,7 @@ prisma.$use(async (params, next) => {
       err?.code === 'P2024';
 
     if (isNeonDisconnect) {
-      console.warn('[Prisma] Neon оборвал соединение, переподключаемся...');
-      try {
-        await prisma.$disconnect();
-        await prisma.$connect();
-      } catch (reconnectErr) {
-        console.error('[Prisma] Ошибка реконнекта:', reconnectErr.message);
-      }
-      // Повторяем исходный запрос один раз
+      console.warn('[Prisma] Neon оборвал соединение, повторяем запрос...');
       return await next(params);
     }
 

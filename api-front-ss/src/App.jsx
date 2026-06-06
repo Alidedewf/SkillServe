@@ -36,6 +36,7 @@ import ProtectedSuperAdminRoute from './components/admin/ProtectedSuperAdminRout
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import SuperAdminRestaurants from './pages/admin/SuperAdminRestaurants';
 import MenuPage from './pages/user/MenuPage';
+import NotFound from './pages/user/NotFound';
 
 const App = () => {
   return (
@@ -76,6 +77,9 @@ const App = () => {
             {/* SuperAdmin routes — доступ только для SUPER_ADMIN */}
             <Route path="/superadmin" element={<ProtectedSuperAdminRoute><SuperAdminDashboard /></ProtectedSuperAdminRoute>} />
             <Route path="/superadmin/restaurants" element={<ProtectedSuperAdminRoute><SuperAdminRestaurants /></ProtectedSuperAdminRoute>} />
+
+            {/* Catch-all 404 route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>
       </Router>

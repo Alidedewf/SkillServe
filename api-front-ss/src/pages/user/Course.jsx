@@ -21,9 +21,11 @@ const CoursesPage = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const inProgress = (await fetchInProgressCourses()) || [];
-            const newCoursesData = (await fetchNewCourses()) || [];
-            const archived = (await fetchArchivedCourses()) || [];
+            const [inProgress, newCoursesData, archived] = await Promise.all([
+                fetchInProgressCourses().then(r => r || []),
+                fetchNewCourses().then(r => r || []),
+                fetchArchivedCourses().then(r => r || []),
+            ]);
 
             setInProgressCourses(inProgress);
             setNewCourses(newCoursesData);

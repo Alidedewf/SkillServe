@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const prisma = require('../../prisma');
 const { notFound, badRequest, conflict } = require('../../common/utils/errors');
+const findOrFail = require('../../common/utils/findOrFail');
 
 // ─── 1. STATISTICS ───────────────────────────────────────────────────────────
 const getStats = async (restaurantId) => {
@@ -36,62 +37,35 @@ const getCourses = async (restaurantId) => {
 
   const courses = await prisma.course.findMany({
     where,
-    include: {
-      lessons: true,
-      tests: {
-        include: {
-          questions: {
-            include: {
-              answers: true,
-            },
-          },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      category: true,
+      image_url: true,
+      status: true,
+      created_at: true,
+      _count: {
+        select: {
+          lessons: true,
+          tests: true,
         },
       },
     },
     orderBy: { id: 'desc' },
   });
 
-  return courses.map((course) => {
-    return {
-      id: course.id,
-      title: course.title,
-      description: course.description || '',
-      category: course.category || 'Сервис',
-      image_url: course.image_url || '',
-      is_published: course.status === 'ACTIVE',
-      created_at: course.created_at,
-      lessons: (course.lessons || []).map((l) => {
-        let blocks = [];
-        try {
-          blocks = JSON.parse(l.content);
-        } catch {
-          blocks = [{ order: 1, type: 'text', content: l.content || '' }];
-        }
-        return {
-          id: l.id,
-          course_id: l.course_id,
-          title: l.title,
-          order: l.order,
-          type: l.type.toLowerCase(),
-          blocks: blocks,
-        };
-      }),
-      tests: (course.tests || []).map((t) => ({
-        id: t.id,
-        course_id: t.course_id,
-        title: t.title,
-        questions: (t.questions || []).map((q) => ({
-          id: q.id,
-          content: q.content,
-          answers: (q.answers || []).map((a) => ({
-            id: a.id,
-            content: a.content,
-            is_correct: a.is_correct,
-          })),
-        })),
-      })),
-    };
-  });
+  return courses.map((course) => ({
+    id: course.id,
+    title: course.title,
+    description: course.description || '',
+    category: course.category || 'Сервис',
+    image_url: course.image_url || '',
+    is_published: course.status === 'ACTIVE',
+    created_at: course.created_at,
+    lessons_count: course._count.lessons,
+    tests_count: course._count.tests,
+  }));
 };
 
 const getCourseById = async (restaurantId, courseId) => {
@@ -221,17 +195,11 @@ const createCourse = async (restaurantId, { title, description, category, image_
     }
 
     return { id: courseId, message: 'Курс успешно создан' };
-  });
+  }, { maxWait: 10000, timeout: 15000 });
 };
 
 const updateCourse = async (restaurantId, courseId, { title, description, category, image_url, is_published, lessons, tests }) => {
-  const courseWhere = { id: courseId };
-  if (restaurantId) courseWhere.restaurant_id = restaurantId;
-
-  const existingCourse = await prisma.course.findFirst({
-    where: courseWhere,
-  });
-  if (!existingCourse) throw notFound('Курс');
+  await findOrFail('course', courseId, restaurantId, 'Курс');
 
   return prisma.$transaction(async (tx) => {
     // Обновляем только те поля курса, которые реально переданы
@@ -326,17 +294,11 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
     // Если tests не передан — не трогаем существующие тесты
 
     return { id: courseId, message: 'Курс успешно обновлен' };
-  });
+  }, { maxWait: 15000, timeout: 30000 });
 };
 
 const deleteCourse = async (restaurantId, courseId) => {
-  const courseWhere = { id: courseId };
-  if (restaurantId) courseWhere.restaurant_id = restaurantId;
-
-  const course = await prisma.course.findFirst({
-    where: courseWhere,
-  });
-  if (!course) throw notFound('Курс');
+  await findOrFail('course', courseId, restaurantId, 'Курс');
 
   await prisma.course.delete({ where: { id: courseId } });
   return { message: 'Курс успешно удален' };
@@ -449,13 +411,7 @@ const createUser = async (restaurantId, { first_name, last_name, email, password
 };
 
 const updateUser = async (restaurantId, userId, { first_name, last_name, email, password, role, position }) => {
-  const userWhere = { id: userId };
-  if (restaurantId) userWhere.restaurant_id = restaurantId;
-
-  const existingUser = await prisma.user.findFirst({
-    where: userWhere,
-  });
-  if (!existingUser) throw notFound('Пользователь');
+  await findOrFail('user', userId, restaurantId, 'Пользователь');
 
   const fullName = `${first_name || ''} ${last_name || ''}`.trim();
   const data = {
@@ -493,13 +449,7 @@ const updateUser = async (restaurantId, userId, { first_name, last_name, email, 
 };
 
 const deleteUser = async (restaurantId, userId) => {
-  const userWhere = { id: userId };
-  if (restaurantId) userWhere.restaurant_id = restaurantId;
-
-  const user = await prisma.user.findFirst({
-    where: userWhere,
-  });
-  if (!user) throw notFound('Пользователь');
+  await findOrFail('user', userId, restaurantId, 'Пользователь');
 
   await prisma.user.delete({ where: { id: userId } });
   return { message: 'Пользователь успешно удален' };
@@ -525,12 +475,7 @@ const createAchievement = async (restaurantId, { title, description, image_url, 
   if (!title) throw badRequest('Название достижения обязательно');
 
   if (course_id) {
-    const courseWhere = { id: course_id };
-    if (restaurantId) courseWhere.restaurant_id = restaurantId;
-    const course = await prisma.course.findFirst({
-      where: courseWhere,
-    });
-    if (!course) throw notFound('Курс');
+    await findOrFail('course', parseInt(course_id), restaurantId, 'Курс');
   }
 
   return prisma.achievement.create({
@@ -549,21 +494,10 @@ const createAchievement = async (restaurantId, { title, description, image_url, 
 };
 
 const updateAchievement = async (restaurantId, id, { title, description, image_url, course_id }) => {
-  const achWhere = { id };
-  if (restaurantId) achWhere.restaurant_id = restaurantId;
-
-  const existing = await prisma.achievement.findFirst({
-    where: achWhere,
-  });
-  if (!existing) throw notFound('Достижение');
+  await findOrFail('achievement', id, restaurantId, 'Достижение');
 
   if (course_id) {
-    const courseWhere = { id: course_id };
-    if (restaurantId) courseWhere.restaurant_id = restaurantId;
-    const course = await prisma.course.findFirst({
-      where: courseWhere,
-    });
-    if (!course) throw notFound('Курс');
+    await findOrFail('course', parseInt(course_id), restaurantId, 'Курс');
   }
 
   return prisma.achievement.update({
@@ -582,13 +516,7 @@ const updateAchievement = async (restaurantId, id, { title, description, image_u
 };
 
 const deleteAchievement = async (restaurantId, id) => {
-  const achWhere = { id };
-  if (restaurantId) achWhere.restaurant_id = restaurantId;
-
-  const existing = await prisma.achievement.findFirst({
-    where: achWhere,
-  });
-  if (!existing) throw notFound('Достижение');
+  await findOrFail('achievement', id, restaurantId, 'Достижение');
 
   await prisma.achievement.delete({ where: { id } });
   return { message: 'Достижение удалено' };
@@ -600,20 +528,10 @@ const grantAchievement = async (restaurantId, achievementId, { user_id }) => {
   const userId = parseInt(user_id);
 
   // Проверяем что достижение принадлежит ресторану
-  const achWhere = { id: achievementId };
-  if (restaurantId) achWhere.restaurant_id = restaurantId;
-  const achievement = await prisma.achievement.findFirst({
-    where: achWhere,
-  });
-  if (!achievement) throw notFound('Достижение');
+  await findOrFail('achievement', achievementId, restaurantId, 'Достижение');
 
   // Проверяем что пользователь принадлежит ресторану
-  const userWhere = { id: userId };
-  if (restaurantId) userWhere.restaurant_id = restaurantId;
-  const user = await prisma.user.findFirst({
-    where: userWhere,
-  });
-  if (!user) throw notFound('Пользователь');
+  await findOrFail('user', userId, restaurantId, 'Пользователь');
 
   return prisma.userAchievement.upsert({
     where: {
