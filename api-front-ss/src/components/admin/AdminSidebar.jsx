@@ -14,7 +14,6 @@ const AdminSidebar = () => {
     { to: '/admin',              label: 'Обзор',           icon: FiGrid,   end: true },
     { to: '/admin/courses',      label: 'Курсы',           icon: FiBook },
     { to: '/admin/users',        label: 'Пользователи',    icon: FiUsers },
-    { to: '/admin/org-structure', label: 'Оргструктура',   icon: FiLayers },
   ];
 
   const handleLogout = () => {

@@ -11,7 +11,12 @@ const tenantMiddleware = (req, res, next) => {
   // SUPER_ADMIN может работать с любым рестораном
   if (req.user.role === 'SUPER_ADMIN') {
     const headerRestaurantId = req.headers['x-restaurant-id'];
-    req.restaurantId = headerRestaurantId ? parseInt(headerRestaurantId, 10) : null;
+    if (headerRestaurantId) {
+      const parsed = parseInt(headerRestaurantId, 10);
+      req.restaurantId = Number.isNaN(parsed) ? null : parsed;
+    } else {
+      req.restaurantId = null;
+    }
     return next();
   }
 

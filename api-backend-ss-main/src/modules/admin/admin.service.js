@@ -5,8 +5,8 @@ const findOrFail = require('../../common/utils/findOrFail');
 
 // ─── 1. STATISTICS ───────────────────────────────────────────────────────────
 const getStats = async (restaurantId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   const total_courses = await prisma.course.count({
     where,
@@ -15,8 +15,7 @@ const getStats = async (restaurantId) => {
     where: { ...where, status: 'ACTIVE' },
   });
 
-  const userWhere = { role: 'USER' };
-  if (restaurantId) userWhere.restaurant_id = restaurantId;
+  const userWhere = { role: 'USER', restaurant_id: restaurantId };
 
   const total_users = await prisma.user.count({
     where: userWhere,
@@ -32,8 +31,8 @@ const getStats = async (restaurantId) => {
 
 // ─── 2. COURSE MANAGEMENT ────────────────────────────────────────────────────
 const getCourses = async (restaurantId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   const courses = await prisma.course.findMany({
     where,
@@ -69,8 +68,8 @@ const getCourses = async (restaurantId) => {
 };
 
 const getCourseById = async (restaurantId, courseId) => {
-  const where = { id: courseId };
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { id: courseId, restaurant_id: restaurantId };
 
   const course = await prisma.course.findFirst({
     where,
@@ -331,8 +330,8 @@ const getOrCreatePosition = async (restaurantId, positionName) => {
 
 // ─── 3. USER MANAGEMENT ──────────────────────────────────────────────────────
 const getUsers = async (restaurantId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   const users = await prisma.user.findMany({
     where,
@@ -457,8 +456,8 @@ const deleteUser = async (restaurantId, userId) => {
 
 // ─── 4. ACHIEVEMENT MANAGEMENT ───────────────────────────────────────────────
 const getAchievements = async (restaurantId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   return prisma.achievement.findMany({
     where,

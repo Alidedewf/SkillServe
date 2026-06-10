@@ -30,6 +30,7 @@ const upload = multer({
 // Категории
 router.get('/categories', menuController.adminGetCategories);
 router.post('/categories', menuController.adminCreateCategory);
+router.delete('/categories/:id', menuController.adminDeleteCategory);
 
 // Блюда (Items)
 router.post('/items', menuController.adminCreateItem);

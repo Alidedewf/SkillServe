@@ -33,6 +33,17 @@ const adminCreateCategory = async (req, res) => {
   }
 };
 
+const adminDeleteCategory = async (req, res) => {
+  try {
+    const result = await menuService.adminDeleteCategory(req.restaurantId, parseInt(req.params.id));
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.adminDeleteCategory]', err);
+    res.status(500).json({ error: 'Ошибка удаления категории' });
+  }
+};
+
 const adminCreateItem = async (req, res) => {
   try {
     const item = await menuService.adminCreateItem(req.restaurantId, req.body);
@@ -106,6 +117,7 @@ module.exports = {
   getMenu,
   adminGetCategories,
   adminCreateCategory,
+  adminDeleteCategory,
   adminCreateItem,
   adminUpdateItem,
   adminDeleteItem,

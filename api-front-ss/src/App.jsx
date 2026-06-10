@@ -30,7 +30,6 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminCourseEditor from './pages/admin/AdminCourseEditor';
 import AdminAchievements from './pages/admin/AdminAchievements';
 import AdminMenu from './pages/admin/AdminMenu';
-import AdminOrgStructure from './pages/admin/AdminOrgStructure';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import ProtectedSuperAdminRoute from './components/admin/ProtectedSuperAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
@@ -78,7 +77,6 @@ const App = () => {
             <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
             <Route path="/admin/achievements" element={<ProtectedAdminRoute><AdminAchievements /></ProtectedAdminRoute>} />
             <Route path="/admin/menu" element={<ProtectedAdminRoute><AdminMenu /></ProtectedAdminRoute>} />
-            <Route path="/admin/org-structure" element={<ProtectedAdminRoute><AdminOrgStructure /></ProtectedAdminRoute>} />
 
             {/* SuperAdmin routes — доступ только для SUPER_ADMIN */}
             <Route path="/superadmin" element={<ProtectedSuperAdminRoute><SuperAdminDashboard /></ProtectedSuperAdminRoute>} />

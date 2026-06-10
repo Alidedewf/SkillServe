@@ -1,9 +1,9 @@
 const prisma = require('../../prisma');
-const { notFound, conflict } = require('../../common/utils/errors');
+const { notFound, conflict, badRequest } = require('../../common/utils/errors');
 
 const getDepartments = async (restaurantId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   return prisma.department.findMany({
     where,
@@ -38,8 +38,8 @@ const createDepartment = async (restaurantId, { name, order = 0 }) => {
 };
 
 const updateDepartment = async (restaurantId, id, { name, order }) => {
-  const deptWhere = { id };
-  if (restaurantId) deptWhere.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const deptWhere = { id, restaurant_id: restaurantId };
 
   const dept = await prisma.department.findFirst({
     where: deptWhere,
@@ -68,8 +68,8 @@ const updateDepartment = async (restaurantId, id, { name, order }) => {
 };
 
 const deleteDepartment = async (restaurantId, id) => {
-  const deptWhere = { id };
-  if (restaurantId) deptWhere.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const deptWhere = { id, restaurant_id: restaurantId };
 
   const dept = await prisma.department.findFirst({
     where: deptWhere,
@@ -81,8 +81,8 @@ const deleteDepartment = async (restaurantId, id) => {
 };
 
 const getPositions = async (restaurantId, departmentId) => {
-  const where = {};
-  if (restaurantId) where.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const where = { restaurant_id: restaurantId };
 
   if (departmentId !== undefined) {
     where.department_id = departmentId ? parseInt(departmentId) : null;
@@ -101,8 +101,7 @@ const createPosition = async (restaurantId, { department_id, name, order = 0 }) 
   }
 
   if (department_id) {
-    const deptWhere = { id: department_id };
-    if (restaurantId) deptWhere.restaurant_id = restaurantId;
+    const deptWhere = { id: department_id, restaurant_id: restaurantId };
 
     const dept = await prisma.department.findFirst({
       where: deptWhere,
@@ -131,8 +130,8 @@ const createPosition = async (restaurantId, { department_id, name, order = 0 }) 
 };
 
 const updatePosition = async (restaurantId, id, { department_id, name, order }) => {
-  const posWhere = { id };
-  if (restaurantId) posWhere.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const posWhere = { id, restaurant_id: restaurantId };
 
   const pos = await prisma.position.findFirst({
     where: posWhere,
@@ -140,8 +139,7 @@ const updatePosition = async (restaurantId, id, { department_id, name, order }) 
   if (!pos) throw notFound('Должность');
 
   if (department_id) {
-    const deptWhere = { id: department_id };
-    if (restaurantId) deptWhere.restaurant_id = restaurantId;
+    const deptWhere = { id: department_id, restaurant_id: restaurantId };
 
     const dept = await prisma.department.findFirst({
       where: deptWhere,
@@ -172,8 +170,8 @@ const updatePosition = async (restaurantId, id, { department_id, name, order }) 
 };
 
 const deletePosition = async (restaurantId, id) => {
-  const posWhere = { id };
-  if (restaurantId) posWhere.restaurant_id = restaurantId;
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const posWhere = { id, restaurant_id: restaurantId };
 
   const pos = await prisma.position.findFirst({
     where: posWhere,

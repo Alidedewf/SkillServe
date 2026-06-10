@@ -7,9 +7,11 @@ import {
   adminCreateMenuItem,
   adminUpdateMenuItem,
   adminDeleteMenuItem,
+  adminDeleteMenuCategory,
   adminGetMenuPdf,
   adminUploadMenuPdf,
-  adminDeleteMenuPdf
+  adminDeleteMenuPdf,
+  getCurrentRole
 } from '../../services/adminApi';
 import styles from './AdminMenu.module.css';
 
@@ -26,6 +28,9 @@ const AdminMenu = () => {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  // Restaurant context
+  const [restaurantName, setRestaurantName] = useState('');
+
   // Modal states
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [catName, setCatName] = useState('');
@@ -37,9 +42,35 @@ const AdminMenu = () => {
     title: '',
     description: '',
     price: '',
+    portion: '',
     image_url: '',
     visible_to: [] // empty means all
   });
+
+  // Определяем имя ресторана для контекста
+  useEffect(() => {
+    const role = getCurrentRole();
+    if (role === 'SUPER_ADMIN') {
+      setRestaurantName(localStorage.getItem('active_restaurant_name') || '');
+    } else {
+      // Для ADMIN — получаем из профиля
+      const loadRestaurant = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return;
+          const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/users/profile`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          setRestaurantName(data.restaurant?.name || '');
+        } catch (err) {
+          console.error('[AdminMenu] Ошибка загрузки ресторана:', err);
+        }
+      };
+      loadRestaurant();
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -74,6 +105,16 @@ const AdminMenu = () => {
     }
   };
 
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Точно удалить категорию и все ее блюда?')) return;
+    try {
+      await adminDeleteMenuCategory(id);
+      loadData();
+    } catch (err) {
+      alert('Ошибка удаления категории');
+    }
+  };
+
   // --- Item Handlers ---
   const openItemModal = (item = null, catId = '') => {
     if (item) {
@@ -83,6 +124,7 @@ const AdminMenu = () => {
         title: item.title,
         description: item.description || '',
         price: item.price || '',
+        portion: item.portion || '',
         image_url: item.image_url || '',
         visible_to: item.visible_to || []
       });
@@ -93,6 +135,7 @@ const AdminMenu = () => {
         title: '',
         description: '',
         price: '',
+        portion: '',
         image_url: '',
         visible_to: []
       });
@@ -169,7 +212,23 @@ const AdminMenu = () => {
     <AdminLayout>
       <div className={styles.page}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Управление меню</h1>
+          <h1 className={styles.title}>
+            Управление меню
+            {restaurantName && (
+              <span style={{
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#3b82f6',
+                background: '#eff6ff',
+                padding: '4px 12px',
+                borderRadius: 20,
+                marginLeft: 12,
+                verticalAlign: 'middle'
+              }}>
+                {restaurantName}
+              </span>
+            )}
+          </h1>
         </div>
 
         <div className={styles.tabs}>
@@ -213,6 +272,14 @@ const AdminMenu = () => {
                     >
                       <FiPlus size={14} />
                     </button>
+                    <button 
+                      className={`${styles.actionBtn} ${styles.danger}`} 
+                      style={{display: 'inline-flex', marginLeft: 6, width: 24, height: 24}}
+                      onClick={() => handleDeleteCategory(cat.id)}
+                      title="Удалить категорию"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
                   </div>
                   
                   {cat.items.length === 0 ? (
@@ -228,7 +295,10 @@ const AdminMenu = () => {
                           )}
                           <div className={styles.cardBody}>
                             <h4 className={styles.cardTitle}>{item.title}</h4>
-                            <div className={styles.cardPrice}>{item.price || 'Цена не указана'}</div>
+                            <div className={styles.cardPrice}>
+                              {item.price || 'Цена не указана'} 
+                              {item.portion && <span style={{fontSize: 12, color: '#64748b', marginLeft: 8}}>{item.portion}</span>}
+                            </div>
                             <p className={styles.cardDesc}>{item.description}</p>
                             
                             <div className={styles.badgeWrap}>
@@ -323,6 +393,10 @@ const AdminMenu = () => {
               <div className={styles.field}>
                 <label>Цена (например: 500 тг)</label>
                 <input type="text" value={itemForm.price} onChange={e => setItemForm({...itemForm, price: e.target.value})} />
+              </div>
+              <div className={styles.field}>
+                <label>Порция (например: 300 г или 1 шт)</label>
+                <input type="text" value={itemForm.portion} onChange={e => setItemForm({...itemForm, portion: e.target.value})} />
               </div>
               <div className={styles.field}>
                 <label>Описание / Состав</label>

@@ -20,6 +20,8 @@ export const adminLogin = async (email, password) => {
 
 export const adminLogout = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('active_restaurant_id');
+  localStorage.removeItem('active_restaurant_name');
 };
 
 export const getAdminToken = () => localStorage.getItem('token');
@@ -259,6 +261,12 @@ export const adminCreateMenuCategory = (data) => {
   return apiRequest('/admin/menu/categories', {
     method: 'POST',
     body: data,
+  });
+};
+
+export const adminDeleteMenuCategory = (id) => {
+  return apiRequest(`/admin/menu/categories/${id}`, {
+    method: 'DELETE',
   });
 };
 

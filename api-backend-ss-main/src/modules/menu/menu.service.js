@@ -72,7 +72,21 @@ const adminCreateCategory = async (restaurantId, { name, order = 0 }) => {
   });
 };
 
-const adminCreateItem = async (restaurantId, { category_id, title, description, price, image_url, visible_to }) => {
+const adminDeleteCategory = async (restaurantId, categoryId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const category = await prisma.menuCategory.findUnique({
+    where: { id: categoryId }
+  });
+
+  if (!category || category.restaurant_id !== restaurantId) {
+    throw notFound('Категория меню');
+  }
+
+  await prisma.menuCategory.delete({ where: { id: categoryId } });
+  return { message: 'Категория удалена' };
+};
+
+const adminCreateItem = async (restaurantId, { category_id, title, description, price, portion, image_url, visible_to }) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   if (!category_id || !title) throw badRequest('Категория и название обязательны');
 
@@ -88,13 +102,14 @@ const adminCreateItem = async (restaurantId, { category_id, title, description, 
       title,
       description,
       price,
+      portion,
       image_url,
       visible_to: visible_to || [],
     },
   });
 };
 
-const adminUpdateItem = async (restaurantId, itemId, { category_id, title, description, price, image_url, visible_to }) => {
+const adminUpdateItem = async (restaurantId, itemId, { category_id, title, description, price, portion, image_url, visible_to }) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   const item = await prisma.menuItem.findUnique({
     where: { id: itemId },
@@ -109,6 +124,7 @@ const adminUpdateItem = async (restaurantId, itemId, { category_id, title, descr
     title,
     description,
     price,
+    portion,
     image_url,
     visible_to: visible_to !== undefined ? visible_to : undefined,
   };
@@ -195,6 +211,7 @@ module.exports = {
   getMenu,
   adminGetCategories,
   adminCreateCategory,
+  adminDeleteCategory,
   adminCreateItem,
   adminUpdateItem,
   adminDeleteItem,

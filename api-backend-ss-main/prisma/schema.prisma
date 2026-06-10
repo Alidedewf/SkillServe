@@ -275,6 +275,7 @@ model MenuItem {
   title       String
   description String?
   price       String?  // String to allow "500 тг" or similar
+  portion     String?  // e.g. "300 г" or "1 шт"
   image_url   String?
   visible_to  String[] // ["Официант", "Бармен"], empty means all
 

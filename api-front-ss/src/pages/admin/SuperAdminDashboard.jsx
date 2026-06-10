@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SuperAdminSidebar from '../../components/admin/SuperAdminSidebar';
-import { superAdminGetRestaurants, adminGetStats } from '../../services/adminApi';
+import { superAdminGetRestaurants } from '../../services/adminApi';
 import styles from './SuperAdminDashboard.module.css';
 import { FiHome, FiUsers, FiBook, FiEye } from 'react-icons/fi';
 
@@ -25,12 +25,16 @@ const SuperAdminDashboard = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [restsData, statsData] = await Promise.all([
-          superAdminGetRestaurants(),
-          adminGetStats(), // Запрос без контекста вернет общую SaaS статистику
-        ]);
+        const restsData = await superAdminGetRestaurants();
         setRestaurants(restsData);
-        setStats(statsData);
+        // Считаем агрегированную статистику из данных ресторанов
+        const totalUsers = restsData.reduce((sum, r) => sum + (r._count?.users ?? 0), 0);
+        const totalCourses = restsData.reduce((sum, r) => sum + (r._count?.courses ?? 0), 0);
+        setStats({
+          total_courses: totalCourses,
+          published_courses: totalCourses,
+          total_users: totalUsers,
+        });
       } catch (err) {
         console.error('Ошибка загрузки SaaS данных:', err);
       } finally {

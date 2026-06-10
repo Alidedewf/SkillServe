@@ -43,8 +43,17 @@ const getInProgress = async (userId, restaurantId) => {
       course: courseFilter,
       progress: { gt: 0, lt: 100 },
     },
-    include: {
-      course: true,
+    select: {
+      progress: true,
+      course: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          image_url: true,
+        }
+      }
     },
   });
 
@@ -66,7 +75,16 @@ const getNewCourses = async (userId, restaurantId) => {
   const courseFilter = restaurantId ? { restaurant_id: restaurantId } : {};
 
   const [allCourses, progresses] = await Promise.all([
-    prisma.course.findMany({ where: courseWhere }),
+    prisma.course.findMany({ 
+      where: courseWhere,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        image_url: true,
+      }
+    }),
     prisma.userCourseProgress.findMany({
       where: { user_id: userId, course: courseFilter },
       select: { course_id: true, progress: true },
@@ -98,8 +116,17 @@ const getArchived = async (userId, restaurantId) => {
       course: courseFilter,
       progress: 100,
     },
-    include: {
-      course: true,
+    select: {
+      progress: true,
+      course: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          image_url: true,
+        }
+      }
     },
   });
 

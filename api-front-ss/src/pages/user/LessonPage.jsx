@@ -4,6 +4,31 @@ import styles from './LessonPage.module.css';
 import { FiArrowLeft, FiClock, FiBookOpen } from 'react-icons/fi';
 import { fetchLesson, completeLesson } from '../../services/api';
 
+const getEmbedUrl = (url) => {
+    if (!url) return '';
+    
+    // YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        if (url.includes('youtube.com/embed/')) return url;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        if (match && match[2].length === 11) {
+            return `https://www.youtube.com/embed/${match[2]}`;
+        }
+    }
+    
+    // Vimeo
+    if (url.includes('vimeo.com')) {
+        if (url.includes('player.vimeo.com/video/')) return url;
+        const match = url.match(/vimeo\.com\/(?:channels\/[^/]+\/|groups\/[^/]+\/|album\/[^/]+\/video\/|showcase\/[^/]+\/video\/)?([0-9]+)/);
+        if (match && match[1]) {
+            return `https://player.vimeo.com/video/${match[1]}`;
+        }
+    }
+    
+    return url;
+};
+
 const LessonPage = () => {
     const { courseID, lessonID } = useParams();
     const navigate = useNavigate();
@@ -163,9 +188,9 @@ const LessonPage = () => {
                             {block.type === 'video' && (
                                 <div className={styles.videoBlock}>
                                     <div className={styles.videoWrapper}>
-                                        {block.content.includes('youtube.com') || block.content.includes('vimeo.com') ? (
+                                        {block.content.includes('youtube.com') || block.content.includes('youtu.be') || block.content.includes('vimeo.com') ? (
                                             <iframe
-                                                src={block.content}
+                                                src={getEmbedUrl(block.content)}
                                                 title="Lesson Video"
                                                 frameBorder="0"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

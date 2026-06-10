@@ -21,6 +21,13 @@ const AdminLayout = ({ children }) => {
   const isSuperAdmin = role === 'SUPER_ADMIN';
   const activeRestaurantName = localStorage.getItem('active_restaurant_name') || 'Ресторан';
 
+  // SUPER_ADMIN без выбранного ресторана — редирект на выбор
+  useEffect(() => {
+    if (isSuperAdmin && !localStorage.getItem('active_restaurant_id')) {
+      navigate('/superadmin', { replace: true });
+    }
+  }, [isSuperAdmin, navigate]);
+
   const handleLogout = () => {
     adminLogout();
     localStorage.removeItem('active_restaurant_id');

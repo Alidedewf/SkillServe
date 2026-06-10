@@ -9,6 +9,7 @@ const getLeaderboard = async (userId, restaurantId) => {
     role: 'USER',
   };
   if (restaurantId) where.restaurant_id = restaurantId;
+  else return { leaderboard: [], currentUser: null };
 
   const users = await prisma.user.findMany({
     where,

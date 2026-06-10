@@ -14,48 +14,59 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
 
   console.log(`[AI] Генерация курса по теме: "${topic}" (${lessonsCount} уроков, ${difficulty})`);
 
-  const systemPrompt = `Ты — эксперт по обучению персонала в сфере HoReCa (гостиницы, рестораны, кафе, бары).
-Создай обучающий курс по теме: "${topic}".
+  const systemPrompt = `Ты — топовый эксперт-тренер в сфере HoReCa с 10-летним опытом управления премиальными заведениями.
+Твоя задача — создать МАКСИМАЛЬНО ПОЛЕЗНЫЙ, глубокий и практичный обучающий курс по теме: "${topic}".
 
 Параметры:
 - Уровень сложности: ${difficulty}
 - Количество уроков: ${lessonsCount}
 - Категория: ${category}
 
-Требования к контенту:
-1. Каждый урок должен содержать минимум 3-4 абзаца полезного, практического текста.
-2. Текст должен быть написан простым, понятным языком для сотрудников ресторана/кафе.
-3. В конце курса должен быть итоговый тест с ${Math.max(lessonsCount * 2, 5)} вопросами.
-4. Каждый вопрос теста должен иметь ровно 4 варианты ответа, из которых только 1 правильный.
-5. Вопросы теста должны проверять знания из уроков.
+Твои курсы должны быть без "воды", с реальными кейсами. Каждый урок должен читаться на одном дыхании и давать мощные инсайты.
+
+ПРАВИЛА КОНТЕНТА ДЛЯ УРОКОВ (ОЧЕНЬ ВАЖНО):
+1. Структура: используй короткие емкие подзаголовки. Пиши их отдельной строкой БЕЗ точки на конце (система автоматически сделает их заголовками).
+2. Формат: активно используй списки, чеклисты, примеры "Как надо / Как не надо", разбор конфликтных ситуаций с гостями.
+3. Глубина: каждый урок должен быть объемным (5-8 абзацев минимум), с глубоким погружением в тему и практическими советами.
+4. Разделяй абзацы двойным переносом строки (\\n\\n).
+
+ПРАВИЛА ДЛЯ ТЕСТОВ:
+1. Забудь про скучные школьные вопросы (типа "Что такое X?"). Используй ТОЛЬКО сценарные вопросы.
+   (Пример: "Гость жалуется на остывший стейк, ваши действия?", "Полная посадка, пришел постоянный гость без брони. Как поступим?")
+2. В конце курса создай итоговый тест из ${Math.max(lessonsCount * 2, 5)} вопросов.
+3. Ровно 4 варианта ответа на вопрос, только 1 правильный. Неправильные ответы должны быть реалистичными частыми ошибками, а не откровенной глупостью.
 
 КРИТИЧЕСКИ ВАЖНО: Ответ должен быть СТРОГО в формате JSON. 
 Без markdown-обёрток, без \`\`\`json, без пояснений — ТОЛЬКО чистый JSON объект.
 
 Структура JSON:
 {
-  "title": "Название курса на русском языке",
-  "description": "Описание курса (2-3 предложения, кратко и по делу)",
+  "title": "Креативное и цепляющее название курса (на русском)",
+  "description": "Мощное описание курса (3-4 предложения), объясняющее какую реальную боль ресторана решит этот курс",
   "lessons": [
     {
-      "title": "Название урока",
+      "title": "Название урока (интригующее)",
       "type": "text",
       "blocks": [
-        { "type": "text", "content": "Полный текст урока (минимум 3-4 абзаца через \\n\\n)", "order": 1 }
+        { 
+          "type": "text", 
+          "content": "Введение в тему\\n\\nЗдесь идет мощный абзац введения...\\n\\nГлавные правила\\n\\n1. Первое правило...\\n2. Второе правило...\\n\\nКейс из реальной практики\\n\\nОписание ситуации и как ее решили...", 
+          "order": 1 
+        }
       ]
     }
   ],
   "tests": [
     {
-      "title": "Итоговый тест",
+      "title": "Финальный экзамен: Проверка боем",
       "questions": [
         {
-          "content": "Текст вопроса",
+          "content": "Ситуация: [описание ситуации в зале/на кухне]. Ваше действие?",
           "answers": [
-            { "content": "Правильный ответ", "is_correct": true },
-            { "content": "Неправильный ответ 1", "is_correct": false },
-            { "content": "Неправильный ответ 2", "is_correct": false },
-            { "content": "Неправильный ответ 3", "is_correct": false }
+            { "content": "Правильное действие, решающее проблему", "is_correct": true },
+            { "content": "Частая ошибка новичка", "is_correct": false },
+            { "content": "Агрессивный или пассивный вариант", "is_correct": false },
+            { "content": "Игнорирование или перекладывание вины", "is_correct": false }
           ]
         }
       ]
@@ -63,9 +74,9 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
   ]
 }`;
 
-  const MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-  const MAX_RETRIES = 2;
-  const RETRY_DELAY_MS = 2000;
+  const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 3000;
 
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -78,7 +89,7 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
       try {
         console.log(`[AI] Попытка ${attempt}/${MAX_RETRIES} с моделью ${modelName}`);
         result = await model.generateContent(systemPrompt);
-        break; // успех — выходим из внутреннего цикла
+        break; 
       } catch (err) {
         lastError = err;
         const isRetryable = err.status === 503 || err.status === 429 || err.status === 500;
@@ -86,11 +97,11 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
           console.warn(`[AI] ${err.status} от ${modelName}, повтор через ${RETRY_DELAY_MS}мс...`);
           await sleep(RETRY_DELAY_MS * attempt);
         } else {
-          break; // не ретраябельная ошибка или исчерпаны попытки — пробуем следующую модель
+          break; 
         }
       }
     }
-    if (result) break; // успех — выходим из внешнего цикла
+    if (result) break; 
     console.warn(`[AI] Модель ${modelName} недоступна, переключаемся на следующую...`);
   }
 
@@ -101,14 +112,12 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
 
   const responseText = result.response.text();
 
-  // Пытаемся извлечь JSON из ответа (Gemini иногда обёртывает в ```json)
   let jsonStr = responseText;
   const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (jsonMatch) {
     jsonStr = jsonMatch[1].trim();
   }
 
-  // Парсим JSON
   let courseData;
   try {
     courseData = JSON.parse(jsonStr);
@@ -117,7 +126,6 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
     throw new Error('ИИ вернул некорректный формат. Попробуйте ещё раз.');
   }
 
-  // Валидируем обязательные поля
   if (!courseData.title || !courseData.lessons || !Array.isArray(courseData.lessons)) {
     throw new Error('ИИ вернул неполные данные. Попробуйте ещё раз.');
   }

@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const API_URL = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : `http://${window.location.hostname}:5001/api`);
 
 export const getHeaders = () => {
   const token = localStorage.getItem('token');
