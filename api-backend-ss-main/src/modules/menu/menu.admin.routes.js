@@ -6,18 +6,7 @@ const menuController = require('./menu.controller');
 
 const router = express.Router();
 
-// Настройка загрузки PDF-меню
-const uploadDir = path.join(__dirname, '../../../public/menu');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    cb(null, `menu_${Date.now()}.pdf`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -38,9 +27,7 @@ router.put('/items/:id', menuController.adminUpdateItem);
 router.delete('/items/:id', menuController.adminDeleteItem);
 
 // PDF меню
-router.get('/pdf', menuController.adminGetPdf);
 router.post('/upload-pdf', upload.single('file'), menuController.adminUploadPdf);
 router.post('/confirm-parsed', menuController.adminConfirmParsedMenu);
-router.delete('/pdf', menuController.adminDeletePdf);
 
 module.exports = router;

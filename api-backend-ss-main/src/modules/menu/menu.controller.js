@@ -77,51 +77,28 @@ const adminDeleteItem = async (req, res) => {
   }
 };
 
-const adminGetPdf = async (req, res) => {
-  try {
-    const result = await menuService.adminGetPdf(req.restaurantId);
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[menu.adminGetPdf]', err);
-    res.status(500).json({ error: 'Ошибка загрузки настроек' });
-  }
-};
-
 const adminUploadPdf = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Файл не загружен' });
   
   try {
-    const fileUrl = `${req.protocol}://${req.get('host')}/public/menu/${req.file.filename}`;
-    const result = await menuService.adminUploadPdf(req.restaurantId, fileUrl, req.file.path);
+    const result = await menuService.adminUploadPdf(req.restaurantId, req.file.buffer);
     res.json(result);
   } catch (err) {
     if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
     console.error('[menu.adminUploadPdf]', err);
-    res.status(500).json({ error: 'Ошибка сохранения PDF' });
+    res.status(500).json({ error: 'Ошибка обработки PDF' });
   }
 };
 
 const adminConfirmParsedMenu = async (req, res) => {
   try {
-    const { menuData, pdfUrl } = req.body;
-    const result = await menuService.adminConfirmParsedMenu(req.restaurantId, menuData, pdfUrl);
+    const { menuData } = req.body;
+    const result = await menuService.adminConfirmParsedMenu(req.restaurantId, menuData);
     res.json(result);
   } catch (err) {
     if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
     console.error('[menu.adminConfirmParsedMenu]', err);
     res.status(500).json({ error: 'Ошибка подтверждения меню' });
-  }
-};
-
-const adminDeletePdf = async (req, res) => {
-  try {
-    const result = await menuService.adminDeletePdf(req.restaurantId);
-    res.json(result);
-  } catch (err) {
-    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
-    console.error('[menu.adminDeletePdf]', err);
-    res.status(500).json({ error: 'Ошибка удаления PDF' });
   }
 };
 
@@ -133,8 +110,6 @@ module.exports = {
   adminCreateItem,
   adminUpdateItem,
   adminDeleteItem,
-  adminGetPdf,
   adminUploadPdf,
   adminConfirmParsedMenu,
-  adminDeletePdf,
 };

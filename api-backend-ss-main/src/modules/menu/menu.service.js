@@ -161,26 +161,12 @@ const adminDeleteItem = async (restaurantId, itemId) => {
   return { message: 'Позиция удалена' };
 };
 
-const adminGetPdf = async (restaurantId) => {
-  if (!restaurantId) return { url: null };
-  const setting = await prisma.restaurantSetting.findUnique({
-    where: {
-      restaurant_id_key: {
-        restaurant_id: restaurantId,
-        key: 'menu_pdf_url',
-      },
-    },
-  });
-  return { url: setting ? setting.value : null };
-};
-
-const adminUploadPdf = async (restaurantId, fileUrl, filePath) => {
+const adminUploadPdf = async (restaurantId, fileBuffer) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
 
   let pdfText = '';
   try {
-    const dataBuffer = fs.readFileSync(filePath);
-    const pdfData = await pdfParse(dataBuffer);
+    const pdfData = await pdfParse(fileBuffer);
     pdfText = pdfData.text;
   } catch (err) {
     console.error('Ошибка чтения PDF:', err);
@@ -198,12 +184,11 @@ const adminUploadPdf = async (restaurantId, fileUrl, filePath) => {
   // Просто возвращаем распознанные данные на фронтенд (без сохранения в БД)
   return { 
     message: 'PDF успешно проанализирован', 
-    pdfUrl: fileUrl,
     parsedMenu: menuData
   };
 };
 
-const adminConfirmParsedMenu = async (restaurantId, menuData, pdfUrl) => {
+const adminConfirmParsedMenu = async (restaurantId, menuData) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   if (!menuData || !Array.isArray(menuData)) throw badRequest('Некорректные данные меню');
 
@@ -240,42 +225,7 @@ const adminConfirmParsedMenu = async (restaurantId, menuData, pdfUrl) => {
     }
   });
 
-  // Сохраняем ссылку на PDF
-  if (pdfUrl) {
-    await prisma.restaurantSetting.upsert({
-      where: {
-        restaurant_id_key: {
-          restaurant_id: restaurantId,
-          key: 'menu_pdf_url',
-        },
-      },
-      update: { value: pdfUrl },
-      create: {
-        restaurant_id: restaurantId,
-        key: 'menu_pdf_url',
-        value: pdfUrl,
-      },
-    });
-  }
-
   return { message: 'Меню успешно сохранено' };
-};
-
-const adminDeletePdf = async (restaurantId) => {
-  if (!restaurantId) throw badRequest('Не указан ресторан');
-  try {
-    await prisma.restaurantSetting.delete({
-      where: {
-        restaurant_id_key: {
-          restaurant_id: restaurantId,
-          key: 'menu_pdf_url',
-        },
-      },
-    });
-    return { message: 'PDF удален' };
-  } catch (err) {
-    return { message: 'Уже удалено' };
-  }
 };
 
 module.exports = {
@@ -286,8 +236,6 @@ module.exports = {
   adminCreateItem,
   adminUpdateItem,
   adminDeleteItem,
-  adminGetPdf,
   adminUploadPdf,
   adminConfirmParsedMenu,
-  adminDeletePdf,
 };

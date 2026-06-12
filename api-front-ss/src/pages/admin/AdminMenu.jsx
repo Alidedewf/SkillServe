@@ -8,9 +8,7 @@ import {
   adminUpdateMenuItem,
   adminDeleteMenuItem,
   adminDeleteMenuCategory,
-  adminGetMenuPdf,
   adminUploadMenuPdf,
-  adminDeleteMenuPdf,
   adminConfirmParsedMenu,
   getCurrentRole
 } from '../../services/adminApi';
@@ -26,10 +24,8 @@ const AdminMenu = () => {
   const [loading, setLoading] = useState(true);
   
   // States for PDF menu
-  const [pdfUrl, setPdfUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [previewMenu, setPreviewMenu] = useState(null);
-  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
   const [previewEditMode, setPreviewEditMode] = useState(null); // { cIdx, iIdx }
 
   // Restaurant context
@@ -79,19 +75,15 @@ const AdminMenu = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [cats, pdf] = await Promise.all([
-        adminGetMenuCategories(),
-        adminGetMenuPdf()
-      ]);
+      const cats = await adminGetMenuCategories();
       setCategories(cats);
-      setPdfUrl(pdf.url);
     } catch (err) {
       console.error(err);
       alert('Ошибка загрузки данных меню');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [restaurantName]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -212,7 +204,6 @@ const AdminMenu = () => {
     try {
       const res = await adminUploadMenuPdf(file);
       setPreviewMenu(res.parsedMenu);
-      setPreviewPdfUrl(res.pdfUrl);
       alert('PDF проанализирован! Пожалуйста, проверьте результаты перед сохранением.');
     } catch (err) {
       alert('Ошибка загрузки или парсинга PDF');
@@ -225,10 +216,9 @@ const AdminMenu = () => {
   const handleConfirmPreview = async () => {
     try {
       setLoading(true);
-      await adminConfirmParsedMenu(previewMenu, previewPdfUrl);
+      await adminConfirmParsedMenu(previewMenu);
       alert('Меню успешно сохранено!');
       setPreviewMenu(null);
-      setPreviewPdfUrl(null);
       loadData();
       setActiveTab('manual');
     } catch (err) {
@@ -240,7 +230,6 @@ const AdminMenu = () => {
   const handleCancelPreview = () => {
     if (!window.confirm('Отменить результаты ИИ?')) return;
     setPreviewMenu(null);
-    setPreviewPdfUrl(null);
     setPreviewEditMode(null);
   };
 
@@ -270,16 +259,6 @@ const AdminMenu = () => {
     const newMenu = [...previewMenu];
     newMenu.splice(cIdx, 1);
     setPreviewMenu(newMenu);
-  };
-
-  const handleDeletePdf = async () => {
-    if (!window.confirm('Удалить PDF меню?')) return;
-    try {
-      await adminDeleteMenuPdf();
-      setPdfUrl(null);
-    } catch (err) {
-      alert('Ошибка удаления PDF');
-    }
   };
 
   return (
@@ -488,26 +467,36 @@ const AdminMenu = () => {
                   ))}
                 </div>
               </div>
-            ) : pdfUrl ? (
-              <div>
-                <div className={styles.pdfStatus}>
-                  <FiFileText size={24} />
-                  <span>Текущее PDF меню загружено: </span>
-                  <a href={pdfUrl} target="_blank" rel="noreferrer" className={styles.pdfLink}>Открыть файл</a>
-                </div>
-                <div style={{marginTop: 20}}>
-                  <button className={`${styles.createBtn} ${styles.danger}`} onClick={handleDeletePdf} style={{background: '#ef4444'}}>
-                    <FiTrash2 size={18} /> Удалить PDF
-                  </button>
+            ) : uploading ? (
+              <div className={styles.skeletonContainer}>
+                <div className={styles.skeletonHeader}></div>
+                {[1, 2].map((catIdx) => (
+                  <div key={catIdx}>
+                    <div className={styles.skeletonCategory}></div>
+                    <div className={styles.skeletonGrid}>
+                      {[1, 2, 3].map((cardIdx) => (
+                        <div key={cardIdx} className={styles.skeletonCard}>
+                          <div className={`${styles.skeletonLine} ${styles.title}`}></div>
+                          <div className={`${styles.skeletonLine} ${styles.short}`}></div>
+                          <div className={`${styles.skeletonLine} ${styles.medium}`}></div>
+                          <div className={`${styles.skeletonLine} ${styles.medium}`}></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div style={{ textAlign: 'center', marginTop: '20px', color: '#64748b' }}>
+                  <FiUploadCloud size={32} style={{ animation: 'pulse 1.5s infinite ease-in-out', color: '#3b82f6', marginBottom: 10 }} />
+                  <p>ИИ анализирует меню... Пожалуйста, подождите 10-15 секунд.</p>
                 </div>
               </div>
             ) : (
-              <label className={styles.uploadBox} style={{ cursor: uploading ? 'wait' : 'pointer' }}>
+              <label className={styles.uploadBox} style={{ cursor: 'pointer' }}>
                 <input type="file" accept="application/pdf" onChange={handlePdfUpload} disabled={uploading} />
                 <div className={styles.uploadContent}>
-                  <FiUploadCloud size={48} color={uploading ? "#94a3b8" : "#3b82f6"} />
-                  <h3>{uploading ? 'ИИ читает меню...' : 'Нажмите чтобы загрузить PDF'}</h3>
-                  <p>{uploading ? 'Пожалуйста, подождите около 10-15 секунд' : 'Формат: .pdf, размер до 10MB'}</p>
+                  <FiUploadCloud size={48} color="#3b82f6" />
+                  <h3>Нажмите чтобы загрузить PDF</h3>
+                  <p>Формат: .pdf, размер до 10MB</p>
                 </div>
               </label>
             )}
