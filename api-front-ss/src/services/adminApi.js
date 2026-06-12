@@ -306,4 +306,11 @@ export const adminUploadMenuPdf = (file) => {
   });
 };
 
+export const adminConfirmParsedMenu = (menuData, pdfUrl) => {
+  return apiRequest('/admin/menu/confirm-parsed', {
+    method: 'POST',
+    body: { menuData, pdfUrl },
+  });
+};
+
 export const adminDeleteMenuPdf = () => apiRequest('/admin/menu/pdf', { method: 'DELETE' });

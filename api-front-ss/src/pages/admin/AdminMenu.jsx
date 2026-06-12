@@ -11,6 +11,7 @@ import {
   adminGetMenuPdf,
   adminUploadMenuPdf,
   adminDeleteMenuPdf,
+  adminConfirmParsedMenu,
   getCurrentRole
 } from '../../services/adminApi';
 import styles from './AdminMenu.module.css';
@@ -27,6 +28,9 @@ const AdminMenu = () => {
   // States for PDF menu
   const [pdfUrl, setPdfUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [previewMenu, setPreviewMenu] = useState(null);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
+  const [previewEditMode, setPreviewEditMode] = useState(null); // { cIdx, iIdx }
 
   // Restaurant context
   const [restaurantName, setRestaurantName] = useState('');
@@ -145,7 +149,26 @@ const AdminMenu = () => {
 
   const handleItemSubmit = async (e) => {
     e.preventDefault();
-    if (!itemForm.title || !itemForm.category_id) return alert('Заполните название и категорию');
+    if (!itemForm.title) return alert('Заполните название');
+
+    if (previewEditMode) {
+      // Редактирование в режиме превью
+      const { cIdx, iIdx } = previewEditMode;
+      const newMenu = [...previewMenu];
+      newMenu[cIdx].items[iIdx] = {
+        ...newMenu[cIdx].items[iIdx],
+        title: itemForm.title,
+        description: itemForm.description,
+        price: itemForm.price,
+        portion: itemForm.portion
+      };
+      setPreviewMenu(newMenu);
+      setIsItemModalOpen(false);
+      setPreviewEditMode(null);
+      return;
+    }
+
+    if (!itemForm.category_id) return alert('Выберите категорию');
     
     try {
       if (editItemId) {
@@ -188,14 +211,65 @@ const AdminMenu = () => {
     setUploading(true);
     try {
       const res = await adminUploadMenuPdf(file);
-      setPdfUrl(res.url);
-      alert('PDF успешно загружен');
+      setPreviewMenu(res.parsedMenu);
+      setPreviewPdfUrl(res.pdfUrl);
+      alert('PDF проанализирован! Пожалуйста, проверьте результаты перед сохранением.');
     } catch (err) {
-      alert('Ошибка загрузки PDF');
+      alert('Ошибка загрузки или парсинга PDF');
     } finally {
       setUploading(false);
       e.target.value = null; // reset input
     }
+  };
+
+  const handleConfirmPreview = async () => {
+    try {
+      setLoading(true);
+      await adminConfirmParsedMenu(previewMenu, previewPdfUrl);
+      alert('Меню успешно сохранено!');
+      setPreviewMenu(null);
+      setPreviewPdfUrl(null);
+      loadData();
+      setActiveTab('manual');
+    } catch (err) {
+      alert('Ошибка при сохранении меню');
+      setLoading(false);
+    }
+  };
+
+  const handleCancelPreview = () => {
+    if (!window.confirm('Отменить результаты ИИ?')) return;
+    setPreviewMenu(null);
+    setPreviewPdfUrl(null);
+    setPreviewEditMode(null);
+  };
+
+  const openPreviewItemModal = (cIdx, iIdx, item) => {
+    setPreviewEditMode({ cIdx, iIdx });
+    setItemForm({
+      category_id: 'preview', // dummy
+      title: item.title || '',
+      description: item.description || '',
+      price: item.price || '',
+      portion: item.portion || '',
+      image_url: '',
+      visible_to: []
+    });
+    setIsItemModalOpen(true);
+  };
+
+  const handleDeletePreviewItem = (cIdx, iIdx) => {
+    if (!window.confirm('Удалить блюдо из черновика?')) return;
+    const newMenu = [...previewMenu];
+    newMenu[cIdx].items.splice(iIdx, 1);
+    setPreviewMenu(newMenu);
+  };
+
+  const handleDeletePreviewCategory = (cIdx) => {
+    if (!window.confirm('Удалить всю категорию из черновика?')) return;
+    const newMenu = [...previewMenu];
+    newMenu.splice(cIdx, 1);
+    setPreviewMenu(newMenu);
   };
 
   const handleDeletePdf = async () => {
@@ -329,7 +403,92 @@ const AdminMenu = () => {
           </div>
         ) : (
           <div className={styles.pdfSection}>
-            {pdfUrl ? (
+            {previewMenu ? (
+              <div className={styles.previewContainer}>
+                <div className={styles.previewHeader} style={{ 
+                  background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)', 
+                  padding: '32px 24px', 
+                  borderRadius: '16px', 
+                  marginBottom: '30px', 
+                  border: '1px solid #e2e8f0', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                  gap: '20px'
+                }}>
+                  <div>
+                    <h3 style={{ margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '24px' }}>✨</span> Предварительный просмотр от ИИ
+                    </h3>
+                    <p style={{ margin: '12px auto 0 auto', color: '#475569', fontSize: '15px', maxWidth: '600px', lineHeight: '1.5' }}>
+                      ИИ проанализировал PDF и составил черновик меню. Вы можете <b>редактировать</b> и <b>удалять</b> позиции прямо здесь, до сохранения в базу данных.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+                    <button onClick={handleCancelPreview} style={{ padding: '12px 28px', background: 'rgba(255, 255, 255, 0.7)', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = 'rgba(255, 255, 255, 0.9)'} onMouseOut={e => e.target.style.background = 'rgba(255, 255, 255, 0.7)'}>
+                      Отменить
+                    </button>
+                    <button onClick={handleConfirmPreview} style={{ padding: '12px 28px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)', transition: 'transform 0.2s' }} onMouseOver={e => e.target.style.transform = 'scale(1.02)'} onMouseOut={e => e.target.style.transform = 'scale(1)'}>
+                      Сохранить всё в базу
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.previewMenuData}>
+                  {previewMenu.map((cat, cIdx) => (
+                    <div key={cIdx} className={styles.categoryGroup} style={{ 
+                      background: 'white', 
+                      padding: '20px', 
+                      borderRadius: '12px', 
+                      border: '1px dashed #cbd5e1',
+                      marginBottom: '20px'
+                    }}>
+                      <div className={styles.categoryTitle} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{cat.category}</span>
+                        <button 
+                          className={`${styles.actionBtn} ${styles.danger}`} 
+                          style={{display: 'inline-flex', width: 28, height: 28}}
+                          onClick={() => handleDeletePreviewCategory(cIdx)}
+                          title="Удалить категорию из черновика"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                      </div>
+                      
+                      {(!cat.items || cat.items.length === 0) ? (
+                        <p style={{color: '#94a3b8', fontSize: 14}}>Нет блюд</p>
+                      ) : (
+                        <div className={styles.grid}>
+                          {cat.items.map((item, iIdx) => (
+                            <div key={iIdx} className={styles.card} style={{ borderLeft: '3px solid #3b82f6' }}>
+                              <div className={styles.cardBody}>
+                                <h4 className={styles.cardTitle}>{item.title}</h4>
+                                <div className={styles.cardPrice}>
+                                  {item.price || 'Цена не указана'} 
+                                  {item.portion && <span style={{fontSize: 12, color: '#64748b', marginLeft: 8}}>{item.portion}</span>}
+                                </div>
+                                <p className={styles.cardDesc}>{item.description}</p>
+                              </div>
+                              <div className={styles.actions} style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '10px' }}>
+                                <button className={styles.actionBtn} onClick={() => openPreviewItemModal(cIdx, iIdx, item)}>
+                                  <FiEdit2 size={16} />
+                                </button>
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeletePreviewItem(cIdx, iIdx)}>
+                                  <FiTrash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : pdfUrl ? (
               <div>
                 <div className={styles.pdfStatus}>
                   <FiFileText size={24} />
@@ -343,12 +502,12 @@ const AdminMenu = () => {
                 </div>
               </div>
             ) : (
-              <label className={styles.uploadBox}>
+              <label className={styles.uploadBox} style={{ cursor: uploading ? 'wait' : 'pointer' }}>
                 <input type="file" accept="application/pdf" onChange={handlePdfUpload} disabled={uploading} />
                 <div className={styles.uploadContent}>
-                  <FiUploadCloud size={48} color="#3b82f6" />
-                  <h3>{uploading ? 'Загрузка...' : 'Нажмите чтобы загрузить PDF'}</h3>
-                  <p>Формат: .pdf, размер до 10MB</p>
+                  <FiUploadCloud size={48} color={uploading ? "#94a3b8" : "#3b82f6"} />
+                  <h3>{uploading ? 'ИИ читает меню...' : 'Нажмите чтобы загрузить PDF'}</h3>
+                  <p>{uploading ? 'Пожалуйста, подождите около 10-15 секунд' : 'Формат: .pdf, размер до 10MB'}</p>
                 </div>
               </label>
             )}
@@ -379,13 +538,15 @@ const AdminMenu = () => {
             <button className={styles.closeBtn} onClick={() => setIsItemModalOpen(false)}><FiX size={20}/></button>
             <h2 className={styles.modalTitle}>{editItemId ? 'Редактировать блюдо' : 'Новое блюдо'}</h2>
             <form onSubmit={handleItemSubmit} className={styles.form}>
-              <div className={styles.field}>
-                <label>Категория</label>
-                <select value={itemForm.category_id} onChange={e => setItemForm({...itemForm, category_id: parseInt(e.target.value)})} required>
-                  <option value="">Выберите категорию</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
+              {!previewEditMode && (
+                <div className={styles.field}>
+                  <label>Категория</label>
+                  <select value={itemForm.category_id} onChange={e => setItemForm({...itemForm, category_id: parseInt(e.target.value)})} required>
+                    <option value="" disabled>Выберите категорию</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div className={styles.field}>
                 <label>Название</label>
                 <input type="text" value={itemForm.title} onChange={e => setItemForm({...itemForm, title: e.target.value})} required />
@@ -407,22 +568,24 @@ const AdminMenu = () => {
                 <input type="text" value={itemForm.image_url} onChange={e => setItemForm({...itemForm, image_url: e.target.value})} placeholder="https://..." />
               </div>
               
-              <div className={styles.field}>
-                <label>Кто может видеть это блюдо?</label>
-                <p style={{fontSize: 12, color: '#64748b', margin: '0 0 8px 0'}}>Если ничего не выбрано, видят все.</p>
-                <div className={styles.checkboxGroup}>
-                  {POSITIONS.map(pos => (
-                    <label key={pos} className={styles.checkboxLabel}>
-                      <input 
-                        type="checkbox" 
-                        checked={itemForm.visible_to.includes(pos)}
-                        onChange={() => toggleVisibility(pos)}
-                      />
-                      {pos}
-                    </label>
-                  ))}
+              {!previewEditMode && (
+                <div className={styles.field}>
+                  <label>Кто может видеть это блюдо?</label>
+                  <p style={{fontSize: 12, color: '#64748b', margin: '0 0 8px 0'}}>Если ничего не выбрано, видят все.</p>
+                  <div className={styles.checkboxGroup}>
+                    {POSITIONS.map(pos => (
+                      <label key={pos} className={styles.checkboxLabel}>
+                        <input 
+                          type="checkbox" 
+                          checked={itemForm.visible_to.includes(pos)}
+                          onChange={() => toggleVisibility(pos)}
+                        />
+                        {pos}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button type="submit" className={styles.submitBtn}>
                 {editItemId ? 'Сохранить' : 'Добавить'}

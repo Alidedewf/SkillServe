@@ -182,7 +182,68 @@ const generateCoverImage = async ({ title, category }) => {
   return { image_url: selectedImage };
 };
 
+/**
+ * Парсит текст меню ресторана и возвращает структурированный JSON массив.
+ * @param {string} text - Текст меню (например, из PDF).
+ * @returns {Promise<Array>} - Массив категорий с блюдами.
+ */
+const parseMenuTextToJSON = async (text) => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY не установлен. ИИ недоступен.');
+  }
+
+  // Используем актуальную модель gemini-2.5-flash
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+  const prompt = `
+Ты профессиональный парсер ресторанных меню. Твоя задача извлечь информацию из переданного текста меню ресторана и вернуть ее в формате строгого JSON.
+Игнорируй любой мусор, номера телефонов, адреса, рекламу.
+Твоя задача вернуть ТОЛЬКО JSON-массив и ничего больше (без маркдауна, без \`\`\`json).
+
+Формат массива, который ты должен вернуть:
+[
+  {
+    "category": "Название категории (например: Салаты, Горячее, Напитки)",
+    "items": [
+      {
+        "title": "Название блюда",
+        "description": "Описание блюда, состав (если есть, иначе пустая строка)",
+        "price": "Цена строкой (например '2500 тг', '1200', если нет - пустая строка)",
+        "portion": "Граммовка/размер строкой (например '300 г', '1 шт', '0.5 л', если нет - пустая строка)"
+      }
+    ]
+  }
+]
+
+Вот текст меню для парсинга:
+--------------------------------
+${text}
+--------------------------------
+ВЕРНИ ТОЛЬКО ЧИСТЫЙ JSON!`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text().trim();
+    
+    // Очищаем ответ от маркдауна, если Gemini всё же добавил ```json ... ```
+    let cleanJson = responseText;
+    if (cleanJson.startsWith('```json')) {
+      cleanJson = cleanJson.replace(/^```json/, '').replace(/```$/, '').trim();
+    } else if (cleanJson.startsWith('```')) {
+      cleanJson = cleanJson.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+
+    const parsedData = JSON.parse(cleanJson);
+    return parsedData;
+  } catch (error) {
+    console.error('[AI Menu Parsing Error]:', error);
+    throw new Error('Не удалось распарсить меню с помощью ИИ. Возможно, текст слишком сложный или невалидный JSON.');
+  }
+};
+
 module.exports = {
   generateCourseContent,
   generateCoverImage,
+  parseMenuTextToJSON,
 };

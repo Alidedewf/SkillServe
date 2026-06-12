@@ -1,5 +1,8 @@
 const prisma = require('../../prisma');
 const { notFound, badRequest } = require('../../common/utils/errors');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
+const { parseMenuTextToJSON } = require('../ai/ai.service');
 
 const getMenu = async (userId, restaurantId) => {
   const dbUser = await prisma.user.findUnique({
@@ -171,23 +174,91 @@ const adminGetPdf = async (restaurantId) => {
   return { url: setting ? setting.value : null };
 };
 
-const adminUploadPdf = async (restaurantId, fileUrl) => {
+const adminUploadPdf = async (restaurantId, fileUrl, filePath) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
-  await prisma.restaurantSetting.upsert({
-    where: {
-      restaurant_id_key: {
+
+  let pdfText = '';
+  try {
+    const dataBuffer = fs.readFileSync(filePath);
+    const pdfData = await pdfParse(dataBuffer);
+    pdfText = pdfData.text;
+  } catch (err) {
+    console.error('Ошибка чтения PDF:', err);
+    throw badRequest('Не удалось прочитать загруженный PDF файл.');
+  }
+
+  let menuData = [];
+  try {
+    menuData = await parseMenuTextToJSON(pdfText);
+  } catch (err) {
+    console.error('Ошибка Gemini:', err);
+    throw badRequest(err.message);
+  }
+
+  // Просто возвращаем распознанные данные на фронтенд (без сохранения в БД)
+  return { 
+    message: 'PDF успешно проанализирован', 
+    pdfUrl: fileUrl,
+    parsedMenu: menuData
+  };
+};
+
+const adminConfirmParsedMenu = async (restaurantId, menuData, pdfUrl) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  if (!menuData || !Array.isArray(menuData)) throw badRequest('Некорректные данные меню');
+
+  await prisma.$transaction(async (tx) => {
+    // Удаляем старое меню
+    await tx.menuCategory.deleteMany({
+      where: { restaurant_id: restaurantId }
+    });
+
+    for (let i = 0; i < menuData.length; i++) {
+      const catData = menuData[i];
+      const newCat = await tx.menuCategory.create({
+        data: {
+          restaurant_id: restaurantId,
+          name: catData.category || 'Без категории',
+          order: i,
+        }
+      });
+
+      if (catData.items && Array.isArray(catData.items)) {
+        const itemsToCreate = catData.items.map(item => ({
+          category_id: newCat.id,
+          title: item.title || 'Без названия',
+          description: item.description || null,
+          price: item.price ? String(item.price) : null,
+          portion: item.portion ? String(item.portion) : null,
+          visible_to: [],
+        }));
+
+        if (itemsToCreate.length > 0) {
+          await tx.menuItem.createMany({ data: itemsToCreate });
+        }
+      }
+    }
+  });
+
+  // Сохраняем ссылку на PDF
+  if (pdfUrl) {
+    await prisma.restaurantSetting.upsert({
+      where: {
+        restaurant_id_key: {
+          restaurant_id: restaurantId,
+          key: 'menu_pdf_url',
+        },
+      },
+      update: { value: pdfUrl },
+      create: {
         restaurant_id: restaurantId,
         key: 'menu_pdf_url',
+        value: pdfUrl,
       },
-    },
-    update: { value: fileUrl },
-    create: {
-      restaurant_id: restaurantId,
-      key: 'menu_pdf_url',
-      value: fileUrl,
-    },
-  });
-  return { message: 'PDF успешно загружен', url: fileUrl };
+    });
+  }
+
+  return { message: 'Меню успешно сохранено' };
 };
 
 const adminDeletePdf = async (restaurantId) => {
@@ -217,5 +288,6 @@ module.exports = {
   adminDeleteItem,
   adminGetPdf,
   adminUploadPdf,
+  adminConfirmParsedMenu,
   adminDeletePdf,
 };

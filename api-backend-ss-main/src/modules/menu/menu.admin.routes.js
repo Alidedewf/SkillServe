@@ -40,6 +40,7 @@ router.delete('/items/:id', menuController.adminDeleteItem);
 // PDF меню
 router.get('/pdf', menuController.adminGetPdf);
 router.post('/upload-pdf', upload.single('file'), menuController.adminUploadPdf);
+router.post('/confirm-parsed', menuController.adminConfirmParsedMenu);
 router.delete('/pdf', menuController.adminDeletePdf);
 
 module.exports = router;

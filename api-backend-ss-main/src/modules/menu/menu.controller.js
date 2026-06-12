@@ -93,12 +93,24 @@ const adminUploadPdf = async (req, res) => {
   
   try {
     const fileUrl = `${req.protocol}://${req.get('host')}/public/menu/${req.file.filename}`;
-    const result = await menuService.adminUploadPdf(req.restaurantId, fileUrl);
+    const result = await menuService.adminUploadPdf(req.restaurantId, fileUrl, req.file.path);
     res.json(result);
   } catch (err) {
     if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
     console.error('[menu.adminUploadPdf]', err);
     res.status(500).json({ error: 'Ошибка сохранения PDF' });
+  }
+};
+
+const adminConfirmParsedMenu = async (req, res) => {
+  try {
+    const { menuData, pdfUrl } = req.body;
+    const result = await menuService.adminConfirmParsedMenu(req.restaurantId, menuData, pdfUrl);
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.adminConfirmParsedMenu]', err);
+    res.status(500).json({ error: 'Ошибка подтверждения меню' });
   }
 };
 
@@ -123,5 +135,6 @@ module.exports = {
   adminDeleteItem,
   adminGetPdf,
   adminUploadPdf,
+  adminConfirmParsedMenu,
   adminDeletePdf,
 };
