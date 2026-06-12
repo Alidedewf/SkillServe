@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FiX, FiCheck, FiTag } from 'react-icons/fi';
-import { adminCreatePosition, adminUpdatePosition } from '../../services/adminApi';
+import { FiX, FiCheck, FiFolder } from 'react-icons/fi';
+import { adminCreateDepartment, adminUpdateDepartment } from '../../services/adminApi';
 import styles from './PositionCreateModal.module.css';
 
-const PositionCreateModal = ({ onClose, onCreated, initialData, departmentId }) => {
+const DepartmentModal = ({ onClose, onSaved, initialData }) => {
   const [name, setName] = useState(initialData?.name || '');
   const [saving, setSaving] = useState(false);
 
@@ -14,14 +14,14 @@ const PositionCreateModal = ({ onClose, onCreated, initialData, departmentId }) 
     setSaving(true);
     try {
       if (initialData) {
-        await adminUpdatePosition(initialData.dbId, { name: name.trim(), department_id: departmentId });
+        await adminUpdateDepartment(initialData.dbId, { name: name.trim() });
       } else {
-        await adminCreatePosition(name.trim(), departmentId);
+        await adminCreateDepartment(name.trim());
       }
-      onCreated();
+      onSaved();
     } catch (err) {
       console.error(err);
-      alert('Ошибка при сохранении должности');
+      alert('Ошибка при сохранении отдела');
     } finally {
       setSaving(false);
     }
@@ -32,21 +32,21 @@ const PositionCreateModal = ({ onClose, onCreated, initialData, departmentId }) 
       <div className={styles.modal}>
         <div className={styles.header}>
           <div className={styles.titleGroup}>
-            <div className={styles.iconBox}><FiTag /></div>
-            <h3 className={styles.title}>{initialData ? 'Редактировать должность' : 'Новая должность'}</h3>
+            <div className={styles.iconBox}><FiFolder /></div>
+            <h3 className={styles.title}>{initialData ? 'Редактировать отдел' : 'Новый отдел'}</h3>
           </div>
           <button className={styles.closeBtn} onClick={onClose}><FiX /></button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>Название должности</label>
+            <label className={styles.label}>Название отдела</label>
             <input
               autoFocus
               className={styles.input}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Например: Шеф-повар"
+              placeholder="Например: Кухня"
               required
             />
           </div>
@@ -63,4 +63,4 @@ const PositionCreateModal = ({ onClose, onCreated, initialData, departmentId }) 
   );
 };
 
-export default PositionCreateModal;
+export default DepartmentModal;

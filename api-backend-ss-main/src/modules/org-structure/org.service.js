@@ -7,7 +7,16 @@ const getDepartments = async (restaurantId) => {
 
   return prisma.department.findMany({
     where,
-    include: { positions: { orderBy: { order: 'asc' } } },
+    include: { 
+      positions: { 
+        orderBy: { order: 'asc' },
+        include: {
+          _count: {
+            select: { users: true }
+          }
+        }
+      } 
+    },
     orderBy: { order: 'asc' },
   });
 };
@@ -182,6 +191,46 @@ const deletePosition = async (restaurantId, id) => {
   return { message: 'Должность успешно удалена' };
 };
 
+const reorderStructure = async (restaurantId, { departments, positions }) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+
+  // We will run all updates in a single transaction
+  const updates = [];
+
+  // Update department orders
+  if (departments && Array.isArray(departments)) {
+    for (const dept of departments) {
+      updates.push(
+        prisma.department.updateMany({
+          where: { id: dept.id, restaurant_id: restaurantId },
+          data: { order: dept.order },
+        })
+      );
+    }
+  }
+
+  // Update position orders and department IDs
+  if (positions && Array.isArray(positions)) {
+    for (const pos of positions) {
+      updates.push(
+        prisma.position.updateMany({
+          where: { id: pos.id, restaurant_id: restaurantId },
+          data: { 
+            order: pos.order,
+            department_id: pos.department_id
+          },
+        })
+      );
+    }
+  }
+
+  if (updates.length > 0) {
+    await prisma.$transaction(updates);
+  }
+
+  return { message: 'Структура успешно обновлена' };
+};
+
 module.exports = {
   getDepartments,
   createDepartment,
@@ -191,4 +240,5 @@ module.exports = {
   createPosition,
   updatePosition,
   deletePosition,
+  reorderStructure,
 };

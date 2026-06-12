@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiHome, FiBook, FiUsers, FiLogOut, FiAward, FiList } from 'react-icons/fi';
+import { FiHome, FiBook, FiUsers, FiLogOut, FiAward, FiList, FiLayers } from 'react-icons/fi';
 import { adminLogout, getCurrentRole } from '../../services/adminApi';
 import styles from './AdminLayout.module.css';
 
@@ -10,6 +10,7 @@ const navItems = [
   { to: '/admin/users',   label: 'Персонал',    icon: FiUsers },
   { to: '/admin/achievements', label: 'Достижения', icon: FiAward },
   { to: '/admin/menu',    label: 'Меню',        icon: FiList },
+  { to: '/admin/org-structure', label: 'Структура', icon: FiLayers },
 ];
 
 const AdminLayout = ({ children }) => {

@@ -4,6 +4,7 @@ const orgController = require('./org.controller');
 const router = express.Router();
 
 router.get('/departments', orgController.getDepartments);
+router.patch('/departments/reorder', orgController.reorderStructure);
 router.post('/departments', orgController.createDepartment);
 router.put('/departments/:id', orgController.updateDepartment);
 router.delete('/departments/:id', orgController.deleteDepartment);

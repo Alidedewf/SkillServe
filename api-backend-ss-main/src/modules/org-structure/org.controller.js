@@ -89,6 +89,17 @@ const deletePosition = async (req, res) => {
   }
 };
 
+const reorderStructure = async (req, res) => {
+  try {
+    const result = await orgService.reorderStructure(req.restaurantId, req.body);
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[org.reorderStructure]', err);
+    res.status(500).json({ error: 'Ошибка при сохранении структуры' });
+  }
+};
+
 module.exports = {
   getDepartments,
   createDepartment,
@@ -98,4 +109,5 @@ module.exports = {
   createPosition,
   updatePosition,
   deletePosition,
+  reorderStructure,
 };

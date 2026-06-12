@@ -34,6 +34,7 @@ import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import ProtectedSuperAdminRoute from './components/admin/ProtectedSuperAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import SuperAdminRestaurants from './pages/admin/SuperAdminRestaurants';
+import AdminOrgStructure from './pages/admin/AdminOrgStructure';
 import MenuPage from './pages/user/MenuPage';
 import NotFound from './pages/user/NotFound';
 
@@ -50,7 +51,6 @@ const App = () => {
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
             <Route path="/verify-code" element={<PublicRoute><VerifyCode /></PublicRoute>} />
-
             {/* Приватные пользовательские маршруты (доступны только авторизованным) */}
             <Route path="/courses" element={<ProtectedRoute><Course /></ProtectedRoute>} />
             <Route path="/course/:id" element={<ProtectedRoute><CourseLessonsPage /></ProtectedRoute>} />
@@ -77,6 +77,7 @@ const App = () => {
             <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
             <Route path="/admin/achievements" element={<ProtectedAdminRoute><AdminAchievements /></ProtectedAdminRoute>} />
             <Route path="/admin/menu" element={<ProtectedAdminRoute><AdminMenu /></ProtectedAdminRoute>} />
+            <Route path="/admin/org-structure" element={<ProtectedAdminRoute><AdminOrgStructure /></ProtectedAdminRoute>} />
 
             {/* SuperAdmin routes — доступ только для SUPER_ADMIN */}
             <Route path="/superadmin" element={<ProtectedSuperAdminRoute><SuperAdminDashboard /></ProtectedSuperAdminRoute>} />
@@ -90,4 +91,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App

@@ -181,6 +181,13 @@ export const adminDeleteDepartment = (id) => {
   return apiRequest(`/org/departments/${id}`, { method: 'DELETE' });
 };
 
+export const adminReorderOrgStructure = (data) => {
+  return apiRequest('/org/departments/reorder', {
+    method: 'PATCH',
+    body: data,
+  });
+};
+
 // ─── Restaurants CRUD (SUPER_ADMIN only) ─────────────────────────────────────
 
 export const superAdminGetRestaurants = () => apiRequest('/restaurants');
