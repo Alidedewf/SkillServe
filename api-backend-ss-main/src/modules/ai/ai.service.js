@@ -74,9 +74,10 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
   ]
 }`;
 
-  const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
+  // gemini-3.1-flash-lite: 500 RPD, 15 RPM — огромный лимит и не перегружена
+  const MODELS = ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-3-flash'];
   const MAX_RETRIES = 3;
-  const RETRY_DELAY_MS = 3000;
+  const RETRY_DELAY_MS = 5000; // 5 секунд между попытками для 503
 
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -87,22 +88,27 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
     const model = genAI.getGenerativeModel({ model: modelName });
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        console.log(`[AI] Попытка ${attempt}/${MAX_RETRIES} с моделью ${modelName}`);
+        console.log(`[AI] Запрос к модели ${modelName} (попытка ${attempt})...`);
         result = await model.generateContent(systemPrompt);
         break; 
       } catch (err) {
         lastError = err;
-        const isRetryable = err.status === 503 || err.status === 429 || err.status === 500;
-        if (isRetryable && attempt < MAX_RETRIES) {
-          console.warn(`[AI] ${err.status} от ${modelName}, повтор через ${RETRY_DELAY_MS}мс...`);
-          await sleep(RETRY_DELAY_MS * attempt);
+        // 429 = лимит исчерпан — сразу на следующую модель, не спамим
+        if (err.status === 429) {
+          console.warn(`[AI] Модель ${modelName} — лимит исчерпан, пробуем другую...`);
+          break;
+        }
+        // 503 = сервер перегружен — ждём и пробуем ещё раз ту же модель
+        if (err.status === 503 && attempt < MAX_RETRIES) {
+          console.warn(`[AI] ${modelName} перегружена, ждём ${RETRY_DELAY_MS / 1000}с...`);
+          await sleep(RETRY_DELAY_MS);
         } else {
-          break; 
+          break;
         }
       }
     }
-    if (result) break; 
-    console.warn(`[AI] Модель ${modelName} недоступна, переключаемся на следующую...`);
+    if (result) break;
+    console.warn(`[AI] Модель ${modelName} недоступна, переключаемся...`);
   }
 
   if (!result) {
