@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import UserCreateModal from '../../components/admin/UserCreateModal';
 import PositionCreateModal from '../../components/admin/PositionCreateModal';
+import { FiTag } from 'react-icons/fi';
 import { adminGetUsers, adminGetPositions, adminDeleteUser, adminDeletePosition, adminUpdateUser } from '../../services/adminApi';
 import styles from './AdminUsers.module.css';
 
@@ -138,7 +139,7 @@ const AdminUsers = () => {
                   className={`${styles.card} ${selected === pos.id ? styles.cardSelected : ''}`}
                   onClick={() => setSelected(selected === pos.id ? null : pos.id)}
                 >
-                  <div className={styles.posIcon}>🏷️</div>
+                  <div className={styles.posIcon}><FiTag size={16} aria-hidden="true" /></div>
                   <div className={styles.cardInfo}>
                     <p className={styles.cardTitle}>{pos.name}</p>
                   </div>

@@ -1,5 +1,5 @@
 .container {
-    background: #f5f9ff;
+    background: var(--color-surface-2);
     min-height: 100vh;
     padding: 20px;
   }
@@ -15,7 +15,7 @@
     align-items: center;
     background: none;
     border: none;
-    color: #006ffd;
+    color: var(--color-primary);
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -29,7 +29,7 @@
   .title {
     font-size: 24px;
     font-weight: bold;
-    color: #1f2024;
+    color: var(--color-text);
     margin-bottom: 20px;
   }
   
@@ -48,17 +48,17 @@
   .textBlock h3 {
     font-size: 20px;
     font-weight: bold;
-    color: #1f2024;
+    color: var(--color-text);
     margin-bottom: 10px;
   }
   
   .textBlock p {
     font-size: 16px;
-    color: #545454;
+    color: var(--color-text-secondary);
   }
   
   .textBlock a {
-    color: #006ffd;
+    color: var(--color-primary);
     font-weight: bold;
     text-decoration: none;
   }

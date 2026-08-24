@@ -39,7 +39,7 @@ const ResetPassword = () => {
         <div className={styles.card}>
           <div className={styles.header} onClick={handleGoBack}>
             <button className={styles.backButton}>
-              <FiArrowLeft size={24} className={styles.reset_icons} color="#006ffd" />
+              <FiArrowLeft size={24} className={styles.reset_icons} color="var(--color-primary)" />
             </button>
             <h2 className={styles.title}>
               {t.resetPassword}

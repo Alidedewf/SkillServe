@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--color-surface-2);
   font-family: 'Inter', -apple-system, sans-serif;
   padding-bottom: 100px; /* Для Navbar */
   position: relative;
@@ -10,7 +10,7 @@
 /* ── ХЕДЕР С ГРАДИЕНТОМ ───────────────────── */
 .header {
   height: 220px;
-  background: linear-gradient(180deg, #2196f3 0%, #bbdefb 60%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-info) 60%, var(--color-surface-2) 100%);
   padding: 40px 24px 20px;
   position: relative;
 }
@@ -50,14 +50,14 @@
 .sectionTitle {
   font-size: 20px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0;
 }
 
 .seeAllBtn {
   background: none;
   border: none;
-  color: #2196f3;
+  color: var(--color-primary);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -88,7 +88,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--color-surface-3);
 }
 
 .achievementCard img {
@@ -99,7 +99,7 @@
 
 /* ── РЕЙТИНГ ПРЕВЬЮ ────────────────────────── */
 .ratingBox {
-  background: #eef2ff; /* Светло-голубой фон как в макете */
+  background: var(--color-primary-soft); /* Светло-голубой фон как в макете */
   border-radius: 24px;
   padding: 16px;
   display: flex;
@@ -121,13 +121,13 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--color-border-strong);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
@@ -135,7 +135,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #e2e8f0;
+  background: var(--color-border);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -153,14 +153,14 @@
 .userName {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .userXp {
   font-size: 13px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -176,12 +176,12 @@
 
 .goldCrown {
   color: #fff;
-  background: #facc15;
+  background: var(--color-gold);
 }
 
 .silverCrown {
   color: #fff;
-  background: #cbd5e1;
+  background: var(--color-border-strong);
 }
 
 .goldCrown svg, .silverCrown svg {
@@ -191,19 +191,19 @@
 
 .loadingText {
   text-align: center;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-weight: 500;
   padding: 20px;
 }
 
 .locked {
   filter: grayscale(100%) opacity(0.4);
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--color-surface-3);
+  border-color: var(--color-border-strong);
 }
 
 .emptyText {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 14px;
   padding: 20px 0;
   font-weight: 500;

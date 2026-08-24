@@ -1,10 +1,10 @@
 const API_URL = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : `http://${window.location.hostname}:5001/api`);
 
 export const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  // Токен больше НЕ хранится в JS — он в httpOnly-cookie и уходит автоматически
+  // (см. credentials: 'include'). Здесь только несекретные заголовки.
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
   const activeRestaurantId = localStorage.getItem('active_restaurant_id');
   if (activeRestaurantId) {
@@ -29,6 +29,7 @@ export const apiRequest = async (path, options = {}) => {
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers: requestHeaders,
+    credentials: 'include', // отправляем httpOnly-cookie с токеном
     ...(body ? { body: body instanceof FormData ? body : JSON.stringify(body) } : {}),
     ...customOptions
   });

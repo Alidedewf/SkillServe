@@ -423,7 +423,7 @@ const AdminCourseEditor = () => {
                     <label key={pos.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem' }}>
                       <input
                         type="checkbox"
-                        style={{ width: '1.1rem', height: '1.1rem', accentColor: '#006ffd' }}
+                        style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--color-primary)' }}
                         checked={selectedPositions.includes(pos.name)}
                         onChange={() => handlePositionToggle(pos.name)}
                       />

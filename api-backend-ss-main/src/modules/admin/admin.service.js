@@ -120,10 +120,12 @@ const getCourseById = async (restaurantId, courseId) => {
       questions: (t.questions || []).map((q) => ({
         id: q.id,
         content: q.content,
+        type: q.type || 'SINGLE',
         answers: (q.answers || []).map((a) => ({
           id: a.id,
           content: a.content,
           is_correct: a.is_correct,
+          match_target: a.match_target || null,
         })),
       })),
     })),
@@ -146,55 +148,55 @@ const createCourse = async (restaurantId, { title, description, category, image_
 
     const courseId = course.id;
 
-    if (lessons && Array.isArray(lessons)) {
-      for (let i = 0; i < lessons.length; i++) {
-        const l = lessons[i];
-        await tx.lesson.create({
-          data: {
-            course_id: courseId,
-            title: l.title || 'Урок',
-            type: String(l.type).toUpperCase() === 'VIDEO' ? 'VIDEO' : 'TEXT',
-            content: l.blocks ? JSON.stringify(l.blocks) : '',
-            order: i + 1,
-          },
-        });
-      }
+    // Уроки одним запросом (важно для больших авто-курсов).
+    if (lessons && Array.isArray(lessons) && lessons.length > 0) {
+      await tx.lesson.createMany({
+        data: lessons.map((l, i) => ({
+          course_id: courseId,
+          title: l.title || 'Урок',
+          type: String(l.type).toUpperCase() === 'VIDEO' ? 'VIDEO' : 'TEXT',
+          content: l.blocks ? JSON.stringify(l.blocks) : '',
+          order: i + 1,
+        })),
+      });
     }
 
+    // Тесты: на каждый тест — батч вопросов (createManyAndReturn) + батч ответов,
+    // вместо 2N запросов. Иначе большой курс (100+ вопросов) упирается в таймаут.
     if (tests && Array.isArray(tests)) {
       for (const t of tests) {
         const createdTest = await tx.test.create({
-          data: {
-            course_id: courseId,
-            title: t.title || 'Тест',
-          },
+          data: { course_id: courseId, title: t.title || 'Тест' },
         });
 
-        if (t.questions && Array.isArray(t.questions)) {
-          for (const q of t.questions) {
-            const createdQ = await tx.question.create({
-              data: {
-                test_id: createdTest.id,
-                content: q.content,
-              },
-            });
-
-            if (q.answers && Array.isArray(q.answers)) {
-              await tx.answer.createMany({
-                data: q.answers.map((ans) => ({
-                  question_id: createdQ.id,
-                  content: ans.content,
-                  is_correct: !!ans.is_correct,
-                })),
-              });
-            }
+        const qList = Array.isArray(t.questions) ? t.questions : [];
+        if (qList.length > 0) {
+          const createdQs = await tx.question.createManyAndReturn({
+            data: qList.map((q) => ({
+              test_id: createdTest.id,
+              content: q.content,
+              type: q.type || 'SINGLE',
+            })),
+          });
+          const answersData = [];
+          createdQs.forEach((cq, idx) => {
+            const ans = Array.isArray(qList[idx].answers) ? qList[idx].answers : [];
+            ans.forEach((a) => answersData.push({
+              question_id: cq.id,
+              content: a.content,
+              is_correct: !!a.is_correct,
+              match_target: a.match_target || null,
+            }));
+          });
+          if (answersData.length > 0) {
+            await tx.answer.createMany({ data: answersData });
           }
         }
       }
     }
 
     return { id: courseId, message: 'Курс успешно создан' };
-  }, { maxWait: 10000, timeout: 15000 });
+  }, { maxWait: 15000, timeout: 120000 });
 };
 
 const updateCourse = async (restaurantId, courseId, { title, description, category, image_url, is_published, lessons, tests }) => {
@@ -267,6 +269,7 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
               data: {
                 test_id: testId,
                 content: q.content,
+                type: q.type || 'SINGLE',
               },
             });
 
@@ -276,6 +279,7 @@ const updateCourse = async (restaurantId, courseId, { title, description, catego
                   question_id: createdQ.id,
                   content: ans.content,
                   is_correct: !!ans.is_correct,
+                  match_target: ans.match_target || null,
                 })),
               });
             }
@@ -547,7 +551,88 @@ const grantAchievement = async (restaurantId, achievementId, { user_id }) => {
   });
 };
 
+// ─── DASHBOARD (Главная) ─────────────────────────────────────────────
+// Одним вызовом: реальные метрики обучения + статус «Обучения по меню»
+// + список «Требует внимания». Всё на существующих моделях.
+const MENU_COURSE_TITLE = 'Продажи по меню';
+
+const getDashboard = async (restaurantId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+
+  const users = await prisma.user.findMany({
+    where: { restaurant_id: restaurantId, role: 'USER' },
+    select: { id: true, position_id: true },
+  });
+  const userIds = users.map((u) => u.id);
+  const totalUsers = users.length;
+  const usersWithoutPosition = users.filter((u) => !u.position_id).length;
+
+  const [progresses, attempts, courses, dishes, statusSetting] = await Promise.all([
+    userIds.length
+      ? prisma.userCourseProgress.findMany({ where: { user_id: { in: userIds } }, select: { user_id: true, status: true } })
+      : [],
+    userIds.length
+      ? prisma.testAttempt.findMany({ where: { user_id: { in: userIds } }, select: { correct_count: true, total_questions: true } })
+      : [],
+    prisma.course.findMany({
+      where: { restaurant_id: restaurantId },
+      select: { id: true, title: true, status: true, created_at: true, _count: { select: { tests: true } } },
+    }),
+    prisma.menuItem.findMany({ where: { category: { restaurant_id: restaurantId } }, select: { sales_guide: true } }),
+    prisma.restaurantSetting.findUnique({ where: { restaurant_id_key: { restaurant_id: restaurantId, key: 'menu_ai_status' } } }),
+  ]);
+
+  // A. Метрики обучения
+  const completedUsers = new Set(progresses.filter((p) => p.status === 'COMPLETED').map((p) => p.user_id));
+  const engagedUsers = new Set(progresses.filter((p) => p.status === 'IN_PROGRESS' || p.status === 'COMPLETED').map((p) => p.user_id));
+  const completedCount = completedUsers.size;
+  const notStarted = Math.max(0, totalUsers - engagedUsers.size);
+  const completionRate = totalUsers > 0 ? Math.round((completedCount / totalUsers) * 100) : 0;
+
+  let avgScore = 0;
+  if (attempts.length) {
+    const sum = attempts.reduce((a, x) => a + (x.total_questions > 0 ? x.correct_count / x.total_questions : 0), 0);
+    avgScore = Math.round((sum / attempts.length) * 100);
+  }
+
+  // B. Обучение по меню
+  const totalDishes = dishes.length;
+  const dishesWithGuide = dishes.filter((d) => d.sales_guide && d.sales_guide.status === 'ok').length;
+  const menuCourse = courses.find((c) => c.title === MENU_COURSE_TITLE) || null;
+  let aiStage = 'idle';
+  try {
+    const s = statusSetting ? JSON.parse(statusSetting.value) : null;
+    if (s && s.stage) aiStage = s.stage;
+  } catch (e) { /* ignore */ }
+
+  // C. Требует внимания
+  const coursesWithoutTests = courses.filter((c) => c._count.tests === 0).length;
+
+  return {
+    training: { totalUsers, completedCount, completionRate, notStarted, avgScore, testAttempts: attempts.length },
+    menuTraining: {
+      totalDishes,
+      dishesWithGuide,
+      hasCourse: !!menuCourse,
+      courseId: menuCourse ? menuCourse.id : null,
+      courseUpdatedAt: menuCourse ? menuCourse.created_at : null,
+      aiStage,
+    },
+    attention: {
+      coursesWithoutTests,
+      dishesWithoutGuide: totalDishes - dishesWithGuide,
+      usersWithoutPosition,
+      notStarted,
+    },
+    totals: {
+      totalCourses: courses.length,
+      publishedCourses: courses.filter((c) => c.status === 'ACTIVE').length,
+    },
+  };
+};
+
 module.exports = {
+  getDashboard,
   getStats,
   getCourses,
   getCourseById,

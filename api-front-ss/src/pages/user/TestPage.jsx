@@ -46,11 +46,42 @@ const TestPage = () => {
         return () => clearInterval(timer); // Чистим таймер при размонтировании
     }, [timeRemaining, navigate, courseID]);
 
+    // Одиночный выбор (SINGLE / TRUE_FALSE / SCENARIO)
     const handleAnswerSelect = (questionID, answerID) => {
+        setSelectedAnswers((prev) => ({ ...prev, [questionID]: answerID }));
+    };
+
+    // Несколько вариантов (MULTIPLE)
+    const handleMultiToggle = (questionID, answerID) => {
+        setSelectedAnswers((prev) => {
+            const cur = Array.isArray(prev[questionID]) ? prev[questionID] : [];
+            const next = cur.includes(answerID) ? cur.filter((id) => id !== answerID) : [...cur, answerID];
+            return { ...prev, [questionID]: next };
+        });
+    };
+
+    // Сопоставление (MATCHING)
+    const handleMatchSelect = (questionID, answerID, target) => {
         setSelectedAnswers((prev) => ({
             ...prev,
-            [questionID]: answerID,
+            [questionID]: { ...(prev[questionID] || {}), [answerID]: target },
         }));
+    };
+
+    const TYPE_LABELS = {
+        SINGLE: 'Одиночный выбор',
+        TRUE_FALSE: 'Верно / Неверно',
+        SCENARIO: 'Ситуация',
+        MULTIPLE: 'Несколько вариантов',
+        MATCHING: 'Сопоставление',
+    };
+
+    // Отвечен ли вопрос (с учётом типа)
+    const isAnswered = (q) => {
+        const v = selectedAnswers[q.id];
+        if (q.type === 'MULTIPLE') return Array.isArray(v) && v.length > 0;
+        if (q.type === 'MATCHING') return v && Object.keys(v).length === q.answers.length;
+        return v !== undefined && v !== null;
     };
 
     const handleNextQuestion = () => {
@@ -64,10 +95,17 @@ const TestPage = () => {
 
     const handleFinishTest = async () => {
         try {
-            const answers = Object.entries(selectedAnswers).map(([question_id, answer_id]) => ({
-                question_id,
-                answer_id,
-            }));
+            const qById = new Map(test.questions.map((q) => [String(q.id), q]));
+            const answers = Object.entries(selectedAnswers).map(([question_id, val]) => {
+                const type = qById.get(String(question_id))?.type || 'SINGLE';
+                if (type === 'MULTIPLE') {
+                    return { question_id, answer_ids: Array.isArray(val) ? val : [] };
+                }
+                if (type === 'MATCHING') {
+                    return { question_id, matches: Object.entries(val || {}).map(([answer_id, target]) => ({ answer_id, target })) };
+                }
+                return { question_id, answer_id: val };
+            });
             const results = await submitTest(courseID, testID, { answers });
             navigate(`/course/${courseID}/test/${testID}/results`, { state: results });
         } catch (error) {
@@ -141,31 +179,72 @@ const TestPage = () => {
                         className={styles.questionImage}
                     />
                 )}
-                <p className={styles.questionType}>Одиночный выбор</p>
+                <p className={styles.questionType}>
+                    {TYPE_LABELS[currentQuestion.type] || TYPE_LABELS.SINGLE}
+                    {currentQuestion.type === 'MULTIPLE' && ' · можно выбрать несколько'}
+                </p>
                 <p className={styles.question}>{currentQuestion.content}</p>
                 <div className={styles.answers}>
-                    {currentQuestion.answers.map((answer) => (
-                        <label 
-                            key={answer.id} 
-                            className={`${styles.answerLabel} ${selectedAnswers[currentQuestion.id] === answer.id ? styles.selected : ''}`}
-                        >
-                            <input
-                                type="radio"
-                                name={`question-${currentQuestion.id}`}
-                                value={answer.id}
-                                checked={selectedAnswers[currentQuestion.id] === answer.id}
-                                onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
-                                className={styles.radioInput}
-                            />
-                            <span className={styles.customRadio}></span>
-                            <span className={styles.answerText}>{answer.content}</span>
-                        </label>
-                    ))}
+                    {currentQuestion.type === 'MATCHING' ? (
+                        currentQuestion.answers.map((answer) => {
+                            const sel = selectedAnswers[currentQuestion.id] || {};
+                            return (
+                                <div key={answer.id} className={styles.matchRow}>
+                                    <span className={styles.matchLeft}>{answer.content}</span>
+                                    <select
+                                        className={styles.matchSelect}
+                                        value={sel[answer.id] || ''}
+                                        onChange={(e) => handleMatchSelect(currentQuestion.id, answer.id, e.target.value)}
+                                    >
+                                        <option value="" disabled>— выберите —</option>
+                                        {(currentQuestion.match_targets || []).map((t, i) => (
+                                            <option key={i} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            );
+                        })
+                    ) : currentQuestion.type === 'MULTIPLE' ? (
+                        currentQuestion.answers.map((answer) => {
+                            const sel = selectedAnswers[currentQuestion.id];
+                            const checked = Array.isArray(sel) && sel.includes(answer.id);
+                            return (
+                                <label key={answer.id} className={`${styles.answerLabel} ${checked ? styles.selected : ''}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => handleMultiToggle(currentQuestion.id, answer.id)}
+                                        className={styles.radioInput}
+                                    />
+                                    <span className={styles.customRadio}></span>
+                                    <span className={styles.answerText}>{answer.content}</span>
+                                </label>
+                            );
+                        })
+                    ) : (
+                        currentQuestion.answers.map((answer) => (
+                            <label
+                                key={answer.id}
+                                className={`${styles.answerLabel} ${selectedAnswers[currentQuestion.id] === answer.id ? styles.selected : ''}`}
+                            >
+                                <input
+                                    type="radio"
+                                    name={`question-${currentQuestion.id}`}
+                                    value={answer.id}
+                                    checked={selectedAnswers[currentQuestion.id] === answer.id}
+                                    onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
+                                    className={styles.radioInput}
+                                />
+                                <span className={styles.customRadio}></span>
+                                <span className={styles.answerText}>{answer.content}</span>
+                            </label>
+                        ))
+                    )}
                 </div>
             </div>
                 
                 <div className={styles.actions}>
-    {selectedAnswers[currentQuestion.id] ? (
+    {isAnswered(currentQuestion) ? (
         currentQuestionIndex < test.questions.length - 1 ? (
             <button className={styles.nextButton} onClick={handleNextQuestion}>
                 Следующий вопрос

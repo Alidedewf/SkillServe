@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { FiCheck, FiX } from 'react-icons/fi';
 import styles from './TestResultsPage.module.css';
 import icon from '../../assets/images/image.svg';
 
@@ -106,7 +107,7 @@ const TestResultsPage = () => {
             }`}
           >
             <div className={styles.icon}>
-              {question.is_correct ? '✔' : '✘'}
+              {question.is_correct ? <FiCheck aria-hidden="true" /> : <FiX aria-hidden="true" />}
             </div>
             <p>{question.content}</p>
           </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FiHome, FiBook, FiUsers, FiLogOut, FiAward, FiList, FiLayers } from 'react-icons/fi';
 import { adminLogout, getCurrentRole } from '../../services/adminApi';
+import { fetchUserProfile } from '../../services/api';
 import styles from './AdminLayout.module.css';
 
 const navItems = [
@@ -13,7 +14,7 @@ const navItems = [
   { to: '/admin/org-structure', label: 'Структура', icon: FiLayers },
 ];
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = ({ children, title, action }) => {
   const navigate = useNavigate();
   const [adminName, setAdminName] = useState('');
   const [adminInitials, setAdminInitials] = useState('');
@@ -46,13 +47,8 @@ const AdminLayout = ({ children }) => {
   useEffect(() => {
     const loadAdmin = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/users/profile`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
+        // Авторизация по httpOnly-cookie; маршрут защищён ProtectedAdminRoute.
+        const data = await fetchUserProfile();
         const name = data.name || 'Админ';
         setAdminName(name);
         const parts = name.split(' ');
@@ -99,7 +95,7 @@ const AdminLayout = ({ children }) => {
         {isSuperAdmin && (
           <div className={styles.impersonationBadge}>
             <span className={styles.impersonationText} title={activeRestaurantName}>
-              🏠 {activeRestaurantName}
+              <FiHome size={14} style={{ verticalAlign: -2, marginRight: 6 }} aria-hidden="true" /> {activeRestaurantName}
             </span>
             <button className={styles.backToSaaSBtn} onClick={handleBackToSaaS} title="Вернуться к управлению SaaS">
               SaaS Панель
@@ -134,6 +130,12 @@ const AdminLayout = ({ children }) => {
 
       {/* ─── Page Content ─────────────────────────────────────── */}
       <main className={styles.main}>
+        {(title || action) && (
+          <div className={styles.pageHeader}>
+            {title && <h1 className={styles.pageTitle}>{title}</h1>}
+            {action && <div className={styles.pageAction}>{action}</div>}
+          </div>
+        )}
         {children}
       </main>
     </div>

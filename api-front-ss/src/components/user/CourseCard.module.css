@@ -1,10 +1,11 @@
 .card {
   display: flex;
   align-items: center;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: var(--space-4);
   overflow: hidden;
 }
 
@@ -12,9 +13,9 @@
   flex-shrink: 0;
   width: 70px;
   height: 70px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  margin-right: 16px;
+  margin-right: var(--space-4);
   margin-bottom: 25px;
 }
 
@@ -32,37 +33,37 @@
 }
 
 .title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #202244;
-  margin-bottom: 8px;
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
 }
 
 .progressContainer {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: var(--space-3) 0;
 }
 
 .progressBar {
   flex: 1;
   height: 6px;
-  background-color: #e6e6e6;
-  border-radius: 4px;
+  background-color: var(--color-surface-3);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  margin-right: 8px;
+  margin-right: var(--space-2);
 }
 
 .progress {
   height: 6px;
-  background-color: #4caf50;
-  border-radius: 4px;
+  background-color: var(--color-success);
+  border-radius: var(--radius-sm);
 }
 
 .progress_span {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4caf50;
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-success);
 }
 
 .linkButton {
@@ -70,14 +71,14 @@
   align-items: center;
   background: none;
   border: none;
-  color: #006ffd;
-  font-size: 14px;
-  font-weight: bold;
+  color: var(--color-primary);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
   cursor: pointer;
   text-decoration: none;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 2px solid #D4D6DD
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
 }
 
 .linkButton:hover {
@@ -87,5 +88,5 @@
 .icon {
   width: 16px;
   height: 16px;
-  margin-right: 8px;
+  margin-right: var(--space-2);
 }

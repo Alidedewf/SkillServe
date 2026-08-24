@@ -174,16 +174,18 @@ model Question {
   test_id   Int
   content   String
   image_url String?
+  type      String   @default("SINGLE") // SINGLE | MULTIPLE | TRUE_FALSE | SCENARIO | MATCHING
 
   test    Test     @relation(fields: [test_id], references: [id], onDelete: Cascade)
   answers Answer[]
 }
 
 model Answer {
-  id          Int     @id @default(autoincrement())
-  question_id Int
-  content     String
-  is_correct  Boolean @default(false)
+  id           Int     @id @default(autoincrement())
+  question_id  Int
+  content      String
+  is_correct   Boolean @default(false)
+  match_target String? // Правая часть пары для вопросов типа MATCHING
 
   question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 }
@@ -278,6 +280,7 @@ model MenuItem {
   portion     String?  // e.g. "300 г" or "1 шт"
   image_url   String?
   visible_to  String[] // ["Официант", "Бармен"], empty means all
+  sales_guide Json?    // AI Sales Guide: { sellingPhrase, upsell, crossSell, premiumOffer, guestQuestions[], guestAnswers[], keyAdvantages[], status }
 
   category MenuCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
 }

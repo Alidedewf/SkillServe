@@ -79,7 +79,7 @@ body {
    Снимает ограничение max-width: 450px мобильного приложения.
 ──────────────────────────────────────────────────────────────────── */
 body.admin-mode {
-  background: #f0f4ff;
+  background: var(--color-bg);
   background-image: none;
   padding: 0;
   display: block;

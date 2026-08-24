@@ -1,5 +1,8 @@
 node_modules
 build
+.env
+.env.*
+npm-debug.log*
+.git
 .dockerignore
 Dockerfile
-nginx.conf

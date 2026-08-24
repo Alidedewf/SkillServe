@@ -5,6 +5,7 @@ const router = express.Router();
 
 // Статистика
 router.get('/stats', adminController.getStats);
+router.get('/dashboard', adminController.getDashboard);
 
 // Управление курсами (CRUD)
 router.get('/courses', adminController.getCourses);

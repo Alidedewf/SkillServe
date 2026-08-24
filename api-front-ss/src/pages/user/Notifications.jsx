@@ -46,7 +46,7 @@ const Notifications = () => {
             <div key={notification.id} className={styles.notification}>
               <div className={styles.notificationHeader}>
                 <span>{formatDate(notification.created_at)}</span>
-                {notification.is_read ? <FiClock size={20} color="#006ffd" /> : <FiBell size={20} color="#006ffd" />}
+                {notification.is_read ? <FiClock size={20} color="var(--color-primary)" /> : <FiBell size={20} color="var(--color-primary)" />}
               </div>
               <div className={styles.notificationBody}>
                 <p>{notification.title}</p>

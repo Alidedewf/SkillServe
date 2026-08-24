@@ -1,0 +1,101 @@
+/* ════════════════════════════════════════════════════════════════════
+   SkillServe — Дизайн-токены (Clean Light SaaS)
+   Единый источник правды: цвета, типографика, отступы, радиусы, тени.
+   Используй var(--token) во всех модулях вместо хардкода.
+   ════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ─── Бренд (Premium Gold — вариант A, заменяет generic-синий) ───
+     Тёплый золотисто-графитовый акцент, продолжает тему premium
+     HoReCa-фона (radial-gradient в index.css). Контраст проверен:
+     #A16207 на белом = 4.92:1 (проходит AA для обычного текста). */
+  --color-primary:        #A16207;
+  --color-primary-hover:  #8a5405;
+  --color-primary-active: #7a5004;
+  --color-primary-soft:   #fbf3d9;  /* фон активных/выбранных элементов */
+  --color-primary-border: #ecdca3;
+  --color-on-primary:     #ffffff;
+
+  /* ─── Нейтральные (slate) ──────────────────────────────────────── */
+  --color-bg:            #f6f8fb;   /* фон страницы — чистый near-white */
+  --color-surface:       #ffffff;   /* карточки, панели */
+  --color-surface-2:     #f8fafc;   /* вторичные панели, hover-строки */
+  --color-surface-3:     #f1f5f9;   /* инпуты, чипы */
+  --color-border:        #e6eaf0;   /* hairline-границы */
+  --color-border-strong: #d4dae3;
+
+  --color-text:           #0f172a;  /* заголовки (slate-900) */
+  --color-text-secondary: #475569;  /* основной текст (slate-600) */
+  --color-text-muted:     #94a3b8;  /* подписи (slate-400) */
+
+  /* ─── Семантические ────────────────────────────────────────────── */
+  --color-success:      #10b981;
+  --color-success-soft: #e7f7f1;
+  --color-warning:      #f59e0b;
+  --color-warning-soft: #fef3e2;
+  --color-danger:       #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-soft:  #fdecec;
+  --color-info:         #3b82f6;
+  --color-purple:       #7c3aed;
+  --color-purple-hover: #6d28d9;  /* было хардкодом в 6+ местах */
+  --color-purple-light: #a78bfa;  /* для градиентов, было хардкодом */
+  --color-purple-soft:  #f1ebff;
+  --color-danger-border-soft: #f7c5c5; /* лёгкая рамка на danger-soft фоне */
+
+  /* ─── Achievement (сертификаты, рейтинг, медали) ────────────────
+     Отдельная семантика — не "success", а "награда/статус".
+     Раньше — хардкод-градиенты золота/бронзы в Certificates.jsx. */
+  --color-gold:        #d4af37;
+  --color-gold-soft:   #fbf3d9;
+  --color-silver:      #a8b0bb;
+  --color-silver-soft: #f1f3f5;
+  --color-bronze:      #b3672b;
+  --color-bronze-soft: #f6e9dd;
+
+  /* ─── Типографика ──────────────────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-md:   15px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  34px;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-extra:    800;
+
+  /* ─── Отступы (4px scale) ──────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ─── Радиусы ──────────────────────────────────────────────────── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-full: 999px;
+
+  /* ─── Тени (мягкие, SaaS) ──────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.18);
+  --ring: 0 0 0 3px rgba(161, 98, 7, 0.18);  /* focus-ring, тон = --color-primary */
+
+  /* ─── Прочее ───────────────────────────────────────────────────── */
+  --header-height: 64px;
+  --sidebar-width: 264px;
+  --transition: 0.15s ease;
+  --content-max: 1200px;
+}

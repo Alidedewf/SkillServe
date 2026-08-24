@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 
 const authMiddleware = require('./common/middleware/auth.middleware');
 const tenantMiddleware = require('./common/middleware/tenant.middleware');
@@ -7,13 +9,23 @@ const requireRole = require('./common/middleware/role.middleware');
 
 const app = express();
 
+// Доверяем прокси (nginx и т.п.) — нужно для корректной работы secure-cookie за HTTPS-прокси
+app.set('trust proxy', 1);
+
 // ─── Middleware ──────────────────────────────────────────────────────
+// Security-заголовки (HSTS, noSniff, frameguard и т.д.).
+// crossOriginResourcePolicy: 'cross-origin' — чтобы статика из /public (картинки,
+// аватары, меню) грузилась фронтендом с другого origin (localhost:3000).
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(cookieParser());
 app.use('/public', express.static('public'));
 
 // ─── Routes ─────────────────────────────────────────────────────────

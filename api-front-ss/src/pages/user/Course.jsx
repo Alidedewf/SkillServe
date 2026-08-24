@@ -107,7 +107,7 @@ const CoursesPage = () => {
                                     <div style={{
                                         width: '100%',
                                         height: '100%',
-                                        background: 'linear-gradient(135deg, #006ffd, #3b9eff)',
+                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-gold))',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',

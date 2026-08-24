@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiBook, FiZap } from 'react-icons/fi';
 import AdminLayout from '../../components/admin/AdminLayout';
 import CourseCreateModal from '../../components/admin/CourseCreateModal';
 import AIGenerateModal from '../../components/admin/AIGenerateModal';
@@ -165,7 +166,7 @@ const AdminCourses = () => {
                   <div className={styles.cardImage}>
                     {course.image_url
                       ? <img src={course.image_url} alt={course.title} />
-                      : <div className={styles.cardImagePlaceholder}>📚</div>
+                      : <div className={styles.cardImagePlaceholder}><FiBook size={20} aria-hidden="true" /></div>
                     }
                   </div>
                   <div className={styles.cardInfo}>
@@ -193,7 +194,7 @@ const AdminCourses = () => {
             className={`${styles.actionBtn} ${styles.actionAI}`}
             onClick={() => setShowAIModal(true)}
           >
-            🪄 Создать с ИИ
+            <FiZap size={16} style={{ verticalAlign: -2, marginRight: 6 }} aria-hidden="true" /> Создать с ИИ
           </button>
           <button
             className={styles.actionBtn}

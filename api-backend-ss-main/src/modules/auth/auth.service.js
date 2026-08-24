@@ -31,9 +31,10 @@ const login = async (email, password) => {
   if (!isMatch) throw unauthorized('Неверный email или пароль');
 
   const token = generateToken(user);
+  const { exp } = jwt.decode(token); // unix-секунды, отдаём фронту для UI-гвардов
   const { password: _, ...userWithoutPassword } = user;
 
-  return { token, user: userWithoutPassword };
+  return { token, expiresAt: exp, user: userWithoutPassword };
 };
 
 /**

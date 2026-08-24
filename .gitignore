@@ -5,6 +5,9 @@ api-backend-ss-main/node_modules/
 
 # Environment variables (СЕКРЕТЫ — не пушить!)
 api-backend-ss-main/.env
+.env
+*.env.bak
+api-backend-ss-main/.env.bak
 
 # Build artifacts
 api-front-ss/build/

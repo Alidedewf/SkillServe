@@ -3,6 +3,7 @@ const { notFound, badRequest } = require('../../common/utils/errors');
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const { parseMenuTextToJSON } = require('../ai/ai.service');
+const menuAiPipeline = require('./menuAiPipeline.service');
 
 const getMenu = async (userId, restaurantId) => {
   const dbUser = await prisma.user.findUnique({
@@ -89,7 +90,7 @@ const adminDeleteCategory = async (restaurantId, categoryId) => {
   return { message: 'Категория удалена' };
 };
 
-const adminCreateItem = async (restaurantId, { category_id, title, description, price, portion, image_url, visible_to }) => {
+const adminCreateItem = async (restaurantId, { category_id, title, description, price, portion, image_url, visible_to, sales_guide }) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   if (!category_id || !title) throw badRequest('Категория и название обязательны');
 
@@ -108,11 +109,12 @@ const adminCreateItem = async (restaurantId, { category_id, title, description, 
       portion,
       image_url,
       visible_to: visible_to || [],
+      sales_guide: sales_guide || undefined,
     },
   });
 };
 
-const adminUpdateItem = async (restaurantId, itemId, { category_id, title, description, price, portion, image_url, visible_to }) => {
+const adminUpdateItem = async (restaurantId, itemId, { category_id, title, description, price, portion, image_url, visible_to, sales_guide }) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   const item = await prisma.menuItem.findUnique({
     where: { id: itemId },
@@ -130,6 +132,7 @@ const adminUpdateItem = async (restaurantId, itemId, { category_id, title, descr
     portion,
     image_url,
     visible_to: visible_to !== undefined ? visible_to : undefined,
+    sales_guide: sales_guide !== undefined ? sales_guide : undefined,
   };
 
   if (category_id !== undefined) {
@@ -192,40 +195,104 @@ const adminConfirmParsedMenu = async (restaurantId, menuData) => {
   if (!restaurantId) throw badRequest('Не указан ресторан');
   if (!menuData || !Array.isArray(menuData)) throw badRequest('Некорректные данные меню');
 
+  // Сохраняем меню за 3 запроса (вместо 2N+1), чтобы уверенно укладываться
+  // в таймаут даже на больших меню (300+ блюд) при высокой латентности БД.
   await prisma.$transaction(async (tx) => {
-    // Удаляем старое меню
-    await tx.menuCategory.deleteMany({
-      where: { restaurant_id: restaurantId }
+    await tx.menuCategory.deleteMany({ where: { restaurant_id: restaurantId } });
+
+    // Все категории одним запросом; order = индекс в menuData (для сопоставления).
+    const createdCats = await tx.menuCategory.createManyAndReturn({
+      data: menuData.map((cat, i) => ({
+        restaurant_id: restaurantId,
+        name: cat.category || 'Без категории',
+        order: i,
+      })),
     });
+    const catIdByOrder = new Map(createdCats.map((c) => [c.order, c.id]));
 
-    for (let i = 0; i < menuData.length; i++) {
-      const catData = menuData[i];
-      const newCat = await tx.menuCategory.create({
-        data: {
-          restaurant_id: restaurantId,
-          name: catData.category || 'Без категории',
-          order: i,
-        }
-      });
-
-      if (catData.items && Array.isArray(catData.items)) {
-        const itemsToCreate = catData.items.map(item => ({
-          category_id: newCat.id,
+    // Все блюда одним createMany.
+    const allItems = [];
+    menuData.forEach((cat, i) => {
+      const categoryId = catIdByOrder.get(i);
+      if (categoryId == null || !Array.isArray(cat.items)) return;
+      for (const item of cat.items) {
+        allItems.push({
+          category_id: categoryId,
           title: item.title || 'Без названия',
           description: item.description || null,
           price: item.price ? String(item.price) : null,
           portion: item.portion ? String(item.portion) : null,
           visible_to: [],
-        }));
-
-        if (itemsToCreate.length > 0) {
-          await tx.menuItem.createMany({ data: itemsToCreate });
-        }
+        });
       }
-    }
-  });
+    });
 
+    if (allItems.length > 0) {
+      await tx.menuItem.createMany({ data: allItems });
+    }
+  }, { maxWait: 15000, timeout: 60000 });
+
+  // Генерация обучения НЕ запускается автоматически — только вручную
+  // (кнопка «Сгенерировать обучение» → /generate-training).
   return { message: 'Меню успешно сохранено' };
+};
+
+// ─── AI Pipeline (статус и повторная генерация) ─────────────────────
+const getAiStatus = async (restaurantId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  return (await menuAiPipeline.getStatus(restaurantId)) || { stage: 'idle' };
+};
+
+const regenerateSalesGuide = async (restaurantId, itemId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  const guide = await menuAiPipeline.regenerateDishSalesGuide(restaurantId, itemId);
+  return { message: 'Sales Guide перегенерирован', sales_guide: guide };
+};
+
+const regenerateCourse = async (restaurantId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  if (await menuAiPipeline.isRunning(restaurantId)) {
+    throw badRequest('Генерация уже идёт — дождитесь завершения.');
+  }
+  menuAiPipeline.startRegenerateCourse(restaurantId);
+  return { message: 'Перегенерация курса запущена' };
+};
+
+// Полная генерация обучающих материалов по ТЕКУЩЕМУ сохранённому меню
+// (без повторной загрузки PDF) — Sales Guide + курс + тесты.
+const generateTraining = async (restaurantId) => {
+  if (!restaurantId) throw badRequest('Не указан ресторан');
+  if (await menuAiPipeline.isRunning(restaurantId)) {
+    throw badRequest('Генерация уже идёт — дождитесь завершения.');
+  }
+  const totalDishes = await prisma.menuItem.count({
+    where: { category: { restaurant_id: restaurantId } },
+  });
+  if (totalDishes === 0) throw badRequest('Меню пустое — сначала добавьте блюда');
+
+  const initialStatus = {
+    stage: 'generating_sales_guide',
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+    totalDishes,
+    processedDishes: 0,
+    salesGuidesOk: 0,
+    salesGuidesFailed: 0,
+    lessons: 0,
+    tests: 0,
+    questions: 0,
+    errors: [],
+    regenCount: 0,
+    courseId: null,
+  };
+  await prisma.restaurantSetting.upsert({
+    where: { restaurant_id_key: { restaurant_id: restaurantId, key: 'menu_ai_status' } },
+    update: { value: JSON.stringify(initialStatus) },
+    create: { restaurant_id: restaurantId, key: 'menu_ai_status', value: JSON.stringify(initialStatus) },
+  });
+  menuAiPipeline.startMenuAiPipeline(restaurantId);
+
+  return { message: 'Генерация обучающих материалов запущена', totalDishes };
 };
 
 module.exports = {
@@ -238,4 +305,8 @@ module.exports = {
   adminDeleteItem,
   adminUploadPdf,
   adminConfirmParsedMenu,
+  getAiStatus,
+  regenerateSalesGuide,
+  regenerateCourse,
+  generateTraining,
 };

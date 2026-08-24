@@ -12,6 +12,7 @@ const getTestById = async (testId, restaurantId) => {
             select: {
               id: true,
               content: true,
+              match_target: true,
             },
           },
         },
@@ -23,9 +24,32 @@ const getTestById = async (testId, restaurantId) => {
     throw notFound('Тест');
   }
 
-  // Remove the course relation before returning to client if not needed,
-  // or keep it. Let's omit the course database info to keep it clean, but keep standard properties.
   const { course, ...testData } = test;
+
+  // Клиенту НЕ отдаём is_correct и привязку match_target по ответам.
+  // Возвращаем тип вопроса; для MATCHING — отдельный перемешанный список
+  // правых вариантов (match_targets), чтобы порядок не выдавал соответствие.
+  testData.questions = (testData.questions || []).map((q) => {
+    const answers = q.answers.map((a) => ({ id: a.id, content: a.content }));
+    const base = {
+      id: q.id,
+      test_id: q.test_id,
+      content: q.content,
+      image_url: q.image_url,
+      type: q.type || 'SINGLE',
+      answers,
+    };
+    if (base.type === 'MATCHING') {
+      const targets = [...new Set(q.answers.map((a) => a.match_target).filter(Boolean))];
+      for (let i = targets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [targets[i], targets[j]] = [targets[j], targets[i]];
+      }
+      base.match_targets = targets;
+    }
+    return base;
+  });
+
   return testData;
 };
 
@@ -48,13 +72,32 @@ const submitTest = async (userId, testId, restaurantId, answers) => {
 
   let correct_count = 0;
   const questionsResult = test.questions.map((q) => {
-    // Ищем ответ пользователя на этот вопрос
     const userAnswer = answers && answers.find((a) => parseInt(a.question_id) === q.id);
-    
-    // Ищем правильный ответ в БД
-    const correctAnswer = q.answers.find((ans) => ans.is_correct);
-    
-    const is_correct = userAnswer && parseInt(userAnswer.answer_id) === (correctAnswer ? correctAnswer.id : null);
+    const type = q.type || 'SINGLE';
+    let is_correct = false;
+
+    if (type === 'MULTIPLE') {
+      // Верно ⇔ множество выбранных == множеству правильных
+      const correctIds = q.answers.filter((a) => a.is_correct).map((a) => a.id).sort((x, y) => x - y);
+      const selected = ((userAnswer && userAnswer.answer_ids) || []).map(Number).sort((x, y) => x - y);
+      is_correct =
+        correctIds.length > 0 &&
+        correctIds.length === selected.length &&
+        correctIds.every((id, i) => id === selected[i]);
+    } else if (type === 'MATCHING') {
+      // Верно ⇔ для каждого ответа сопоставлен верный target
+      const expected = new Map(q.answers.map((a) => [a.id, a.match_target]));
+      const matches = (userAnswer && userAnswer.matches) || [];
+      is_correct =
+        q.answers.length > 0 &&
+        matches.length === q.answers.length &&
+        matches.every((m) => expected.get(parseInt(m.answer_id)) === m.target);
+    } else {
+      // SINGLE | TRUE_FALSE | SCENARIO — один правильный ответ (обратная совместимость)
+      const correctAnswer = q.answers.find((ans) => ans.is_correct);
+      is_correct = !!(userAnswer && parseInt(userAnswer.answer_id) === (correctAnswer ? correctAnswer.id : null));
+    }
+
     if (is_correct) correct_count++;
 
     return {

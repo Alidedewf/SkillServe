@@ -1,6 +1,6 @@
 .container {
     min-height: 100vh;
-    background: linear-gradient(180deg, #006ffd 0%, #fff 10%);
+    background: linear-gradient(180deg, var(--color-primary) 0%, #fff 10%);
   }
   
   .userInfo {
@@ -18,12 +18,12 @@
   .fullName {
     font-size: 20px;
     font-weight: bold;
-    color: #1f2024;
+    color: var(--color-text);
   }
   
   .email {
     font-size: 14px;
-    color: #71727a;
+    color: var(--color-text-secondary);
   }
   
   .settingsList {
@@ -38,7 +38,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 23px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--color-surface-3);
     cursor: pointer;
   }
   
@@ -59,7 +59,7 @@
   .settingItem span {
     flex-grow: 1;
     margin-left: 10px;
-    color: #1f2024;
+    color: var(--color-text);
     font-size: 16px;
   }
   
@@ -68,7 +68,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 23px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--color-surface-3);
     cursor: pointer;
     position: relative;
   }
@@ -94,18 +94,18 @@
   
   .expandedBlock {
     padding: 10px 20px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--color-surface-3);
   }
   
   .languageOption {
     padding: 10px 0;
     font-size: 14px;
-    color: #71727a;
+    color: var(--color-text-secondary);
     cursor: pointer;
   }
   
   .languageOption:hover {
-    color: #1f2024;
+    color: var(--color-text);
   }
 
   .logoutItem {
@@ -114,23 +114,23 @@
     justify-content: space-between;
     padding: 23px;
     cursor: pointer;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--color-surface-3);
     transition: background-color 0.2s;
   }
 
   .logoutItem:hover {
-    background-color: #fef2f2;
+    background-color: var(--color-danger-soft);
   }
 
   .logoutItem span {
     flex-grow: 1;
     margin-left: 10px;
-    color: #ef4444;
+    color: var(--color-danger);
     font-size: 16px;
     font-weight: 600;
   }
 
   .iconLogout {
-    color: #ef4444;
+    color: var(--color-danger);
   }
   

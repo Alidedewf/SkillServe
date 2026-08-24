@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log*
+.env
+.env.*
+.env.bak
+public/menu/*.pdf
+.git
+Dockerfile
+.dockerignore

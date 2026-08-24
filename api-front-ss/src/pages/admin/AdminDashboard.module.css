@@ -1,25 +1,31 @@
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 36px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .statCard {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  border: 1px solid #e2e8f0;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.statCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .statIcon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,75 +33,245 @@
 }
 
 .statValue {
-  font-size: 26px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
   line-height: 1;
-  margin-bottom: 4px;
+  margin: 0 0 var(--space-1) 0;
 }
 
 .statLabel {
-  font-size: 13px;
-  color: #64748b;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quickLinks {
+  margin-top: var(--space-8);
 }
 
 .sectionTitle {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 16px;
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
 }
 
 .linksGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .linkCard {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 24px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
   cursor: pointer;
   text-align: center;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition), color var(--transition);
 }
 
 .linkCard:hover {
-  border-color: #006ffd;
+  border-color: var(--color-primary);
   box-shadow: 0 4px 16px rgba(0, 111, 253, 0.12);
   transform: translateY(-2px);
-  color: #006ffd;
+  color: var(--color-primary);
 }
 
 .linkIcon {
-  color: #006ffd;
+  color: var(--color-primary);
 }
 
 .primaryBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: #006ffd;
-  color: #fff;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.2s ease;
+  font-family: var(--font-sans);
+  transition: background var(--transition);
 }
 
 .primaryBtn:hover {
-  background: #0060e0;
+  background: var(--color-primary-hover);
+}
+
+/* ─── KPI подпись ────────────────────────────────────────────────── */
+.statSub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin: var(--space-1) 0 0;
+}
+
+/* ─── Панели (Обучение по меню / Требует внимания) ───────────────── */
+.panelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-5);
+  margin: var(--space-8) 0;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.panelHeadIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.panelText {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);
+  line-height: 1.5;
+}
+
+.progressWrap {
+  margin-bottom: var(--space-4);
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--color-surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-success);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.progressLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-medium);
+}
+
+.panelActions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.panelBtn {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.panelBtn:hover {
+  background: var(--color-primary-hover);
+}
+
+.panelBtnGhost {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-surface-3);
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.panelBtnGhost:hover {
+  background: var(--color-border-strong);
+}
+
+/* ─── Список «Требует внимания» ──────────────────────────────────── */
+.attentionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.attentionRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-warning-soft);
+  border: 1px solid #f5d9a8;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition), transform var(--transition);
+  font-family: var(--font-sans);
+}
+
+.attentionRow:hover {
+  transform: translateX(2px);
+}
+
+.attentionNum {
+  flex-shrink: 0;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attentionLabel {
+  flex: 1;
+  font-size: var(--text-base);
+  color: #7c5310;
+  font-weight: var(--fw-medium);
+}
+
+.attentionArrow {
+  color: #b45309;
+  flex-shrink: 0;
 }

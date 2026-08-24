@@ -4,6 +4,7 @@ import Navbar from '../../components/user/Navbar';
 import ProfileHeader from '../../components/user/ProfileHeader';
 import translations from '../../i18n/translations'; 
 import styles from './Profile.module.css';
+import { fetchUserProfile, logoutUser } from '../../services/api';
 import { FiAward, FiStar, FiLayers, FiGlobe, FiLock, FiHelpCircle, FiChevronRight, FiLogOut } from 'react-icons/fi';
 
 const Profile = () => {
@@ -24,13 +25,8 @@ const Profile = () => {
         // Загружаем реальные данные профиля из бэкенда
         const loadProfile = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) { navigate('/login'); return; }
-                const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error('Ошибка загрузки профиля');
-                const data = await res.json();
+                // Авторизация по httpOnly-cookie; маршрут защищён ProtectedRoute.
+                const data = await fetchUserProfile();
                 setUser({
                     name: data.name,
                     email: data.email,
@@ -62,7 +58,7 @@ const Profile = () => {
     const handleFAQClick = () => navigate('/faq');
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        logoutUser();
         navigate('/login');
     };
 

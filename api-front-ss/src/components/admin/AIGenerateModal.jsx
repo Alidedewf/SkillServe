@@ -124,7 +124,9 @@ const AIGenerateModal = ({ onClose, onCreated }) => {
         {step === 1 && (
           <div className={styles.stepContent}>
             <div className={styles.header}>
-              <div className={styles.headerIcon}>🪄</div>
+              <div className={styles.headerIcon} style={{ display: 'flex', justifyContent: 'center' }}>
+                <FiZap size={36} color="var(--color-purple)" aria-hidden="true" />
+              </div>
               <h2 className={styles.title}>Создание курса с помощью ИИ</h2>
               <p className={styles.subtitle}>
                 Опишите тему курса, а искусственный интеллект создаст уроки, тесты и обложку за вас
@@ -227,7 +229,9 @@ const AIGenerateModal = ({ onClose, onCreated }) => {
         {step === 3 && courseData && (
           <div className={styles.stepContent}>
             <div className={styles.header}>
-              <div className={styles.headerIcon}>✅</div>
+              <div className={styles.headerIcon} style={{ display: 'flex', justifyContent: 'center' }}>
+                <FiCheckCircle size={36} color="var(--color-success)" aria-hidden="true" />
+              </div>
               <h2 className={styles.title}>Курс сгенерирован!</h2>
             </div>
 

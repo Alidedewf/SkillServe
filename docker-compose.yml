@@ -1,0 +1,61 @@
+# ─── SkillServe — полный стек в Docker ──────────────────────────────
+# Postgres + Backend (Node/Prisma) + Frontend (React/nginx).
+# Запуск:  cp .env.docker.example .env  →  заполнить  →  docker compose up -d --build
+# Первый раз (создать SUPER_ADMIN):  docker compose exec backend npx prisma db seed
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-skillserve}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-skillserve}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-skillserve} -d ${POSTGRES_DB:-skillserve}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: ./api-backend-ss-main
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-skillserve}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-skillserve}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET обязателен (сильный случайный секрет)}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      PORT: "5001"
+      NODE_ENV: production
+      # HTTP-деплой без TLS → COOKIE_SECURE=false. За HTTPS-прокси → true.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - menu_uploads:/app/public/menu
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5001/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  frontend:
+    build:
+      context: ./api-front-ss
+      args:
+        REACT_APP_API_URL: /api
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  db_data:
+  menu_uploads:

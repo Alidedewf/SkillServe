@@ -1,7 +1,7 @@
 
 .container {
     padding: 16px;
-    background: linear-gradient(180deg, #565656 0%, #F5F9FF 100%);
+    background: linear-gradient(180deg, var(--color-text-secondary) 0%, var(--color-surface-2) 100%);
     min-height: 100vh;
   }
   
@@ -63,7 +63,7 @@
   .courseTitle {
     font-size: 16px;
     font-weight: bold;
-    color: #202244;
+    color: var(--color-text);
     margin-bottom: 8px;
   }
   
@@ -76,7 +76,7 @@
   .progressBar {
     flex: 1;
     height: 8px;
-    background-color: #e6e6e6;
+    background-color: var(--color-border);
     border-radius: 4px;
     overflow: hidden;
     margin-right: 8px;
@@ -84,18 +84,18 @@
   
   .progress {
     height: 100%;
-    background-color: #4caf50;
+    background-color: var(--color-success);
   }
   
   .progressText {
     font-size: 14px;
-    color: #4caf50;
+    color: var(--color-success);
     font-weight: bold;
   }
   
   .restoreButton {
     background: none;
-    color: #006ffd;
+    color: var(--color-primary);
     border: none;
     font-size: 14px;
     cursor: pointer;
@@ -103,6 +103,6 @@
   }
   
   .restoreButton:hover {
-    color: #0056b3;
+    color: var(--color-primary-hover);
   }
   

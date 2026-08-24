@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #006FFD 0%, #FFF 40%);
+  background: linear-gradient(180deg, var(--color-primary) 0%, #FFF 40%);
   padding: 20px 20px 90px 20px; /* Space for Navbar */
 }
 
@@ -48,10 +48,10 @@
 
 /* Pulsing animated icon container */
 .pdfIconContainer {
-  background: #eff6ff;
+  background: var(--color-primary-soft);
   padding: 20px;
   border-radius: 50%;
-  color: #3b82f6;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,7 +72,7 @@
   width: 100%;
   max-width: 220px;
   padding: 15px 28px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-active) 100%);
   color: white;
   border: none;
   border-radius: 16px;
@@ -87,7 +87,7 @@
 .pdfBtn:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 30px -6px rgba(37, 99, 235, 0.7);
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary-active) 100%);
 }
 
 .pdfBtn:active {
@@ -112,7 +112,7 @@
   padding: 10px 20px;
   border: none;
   background: white;
-  color: #64748b;
+  color: var(--color-text-secondary);
   border-radius: 24px;
   font-weight: 700;
   font-size: 14px;
@@ -123,14 +123,14 @@
 }
 
 .tab.active {
-  background: #0f172a;
+  background: var(--color-text);
   color: white;
   box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.2);
 }
 
 .tab:hover:not(.active) {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--color-text);
+  background: var(--color-surface-3);
 }
 
 /* Items Grid */
@@ -157,7 +157,7 @@
 
 .cardImgWrap {
   height: 180px;
-  background: #f1f5f9;
+  background: var(--color-surface-3);
   overflow: hidden;
 }
 
@@ -185,7 +185,7 @@
 .cardTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0;
   flex: 1;
   word-break: break-word;
@@ -195,8 +195,8 @@
 .cardPrice {
   font-size: 16px;
   font-weight: 700;
-  color: #10b981;
-  background: #d1fae5;
+  color: var(--color-success);
+  background: var(--color-success-soft);
   padding: 4px 10px;
   border-radius: 8px;
   white-space: nowrap;
@@ -207,14 +207,14 @@
 
 .cardDesc {
   font-size: 14px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin: 0;
 }
 
 .emptyState {
   text-align: center;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   padding: 40px 20px;
 }
 
@@ -223,7 +223,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #0f172a;
+  background-color: var(--color-text);
   overflow: hidden;
 }
 
@@ -231,9 +231,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background-color: #1e293b;
+  background-color: var(--color-text);
   padding: 16px 20px;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--color-text-secondary);
   color: white;
 }
 
@@ -242,8 +242,8 @@
   align-items: center;
   gap: 8px;
   background: transparent;
-  border: 1px solid #475569;
-  color: #e2e8f0;
+  border: 1px solid var(--color-text-secondary);
+  color: var(--color-border);
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
@@ -252,7 +252,7 @@
 }
 
 .backBtn:hover {
-  background: #334155;
+  background: var(--color-text-secondary);
   color: white;
 }
 
@@ -266,7 +266,7 @@
   flex: 1;
   width: 100%;
   height: 100%;
-  background: #1e293b;
+  background: var(--color-text);
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
@@ -276,4 +276,84 @@
   height: 100%;
   border: none;
   background-color: #ffffff;
+}
+
+/* ─── Советы по продаже (Sales Guide) ────────────────────────────── */
+.salesTips {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.salesTipsSummary {
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--color-primary);
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.salesTipsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.salesTipsBody {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.tipRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tipLabel {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-primary);
+}
+
+.tipText {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  line-height: 1.45;
+}
+
+.tipList {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.qa {
+  margin-top: var(--space-1);
+}
+
+.qaQ {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+}
+
+.qaA {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
 }

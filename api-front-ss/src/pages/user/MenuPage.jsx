@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/user/Navbar';
 import { fetchMenu } from '../../services/api';
-import { FiFileText, FiArrowLeft } from 'react-icons/fi';
+import { FiFileText, FiArrowLeft, FiInfo } from 'react-icons/fi';
 import styles from './MenuPage.module.css';
 
 const MenuPage = () => {
@@ -108,6 +108,61 @@ const MenuPage = () => {
                             {item.price && <span className={styles.cardPrice}>{item.price}</span>}
                           </div>
                           {item.description && <p className={styles.cardDesc}>{item.description}</p>}
+
+                          {item.sales_guide && item.sales_guide.status === 'ok' && (
+                            <details className={styles.salesTips}>
+                              <summary className={styles.salesTipsSummary}>
+                              <FiInfo size={16} style={{ verticalAlign: -2, marginRight: 6 }} aria-hidden="true" /> Советы по продаже
+                            </summary>
+                              <div className={styles.salesTipsBody}>
+                                {item.sales_guide.sellingPhrase && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Как презентовать</span>
+                                    <p className={styles.tipText}>{item.sales_guide.sellingPhrase}</p>
+                                  </div>
+                                )}
+                                {item.sales_guide.upsell && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Допродажа</span>
+                                    <p className={styles.tipText}>{item.sales_guide.upsell}</p>
+                                  </div>
+                                )}
+                                {item.sales_guide.crossSell && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Сочетается с</span>
+                                    <p className={styles.tipText}>{item.sales_guide.crossSell}</p>
+                                  </div>
+                                )}
+                                {item.sales_guide.premiumOffer && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Премиум-вариант</span>
+                                    <p className={styles.tipText}>{item.sales_guide.premiumOffer}</p>
+                                  </div>
+                                )}
+                                {Array.isArray(item.sales_guide.keyAdvantages) && item.sales_guide.keyAdvantages.length > 0 && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Преимущества</span>
+                                    <ul className={styles.tipList}>
+                                      {item.sales_guide.keyAdvantages.map((a, i) => <li key={i}>{a}</li>)}
+                                    </ul>
+                                  </div>
+                                )}
+                                {Array.isArray(item.sales_guide.guestQuestions) && item.sales_guide.guestQuestions.length > 0 && (
+                                  <div className={styles.tipRow}>
+                                    <span className={styles.tipLabel}>Вопросы гостя</span>
+                                    {item.sales_guide.guestQuestions.map((q, i) => (
+                                      <div key={i} className={styles.qa}>
+                                        <p className={styles.qaQ}>— {q}</p>
+                                        {item.sales_guide.guestAnswers && item.sales_guide.guestAnswers[i] && (
+                                          <p className={styles.qaA}>{item.sales_guide.guestAnswers[i]}</p>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </details>
+                          )}
                         </div>
                       </div>
                     ))}

@@ -1,6 +1,38 @@
 import { apiRequest } from './apiClient';
 
 // ─── Auth & Helpers ──────────────────────────────────────────────────────────
+// Сам JWT живёт в httpOnly-cookie и недоступен JS (защита от XSS). В localStorage
+// под ключом 'auth' храним ТОЛЬКО несекретные claims (id, role, exp) — нужны
+// исключительно для клиентских route-гвардов. Доступа к API они не дают:
+// реальная авторизация выполняется по cookie на стороне сервера.
+
+const AUTH_KEY = 'auth';
+
+export const setAuth = (user, expiresAt) => {
+  localStorage.setItem(
+    AUTH_KEY,
+    JSON.stringify({ id: user.id, role: user.role, exp: expiresAt })
+  );
+};
+
+export const clearAuth = () => {
+  localStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem('active_restaurant_id');
+  localStorage.removeItem('active_restaurant_name');
+};
+
+// Имя decodeToken сохранено для обратной совместимости с гвардами,
+// но теперь читает claims из localStorage, а не декодирует JWT.
+export const decodeToken = () => {
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('[auth] Не удалось прочитать claims:', err);
+    return null;
+  }
+};
 
 export const adminLogin = async (email, password) => {
   const data = await apiRequest('/auth/login', {
@@ -14,57 +46,42 @@ export const adminLogin = async (email, password) => {
     throw new Error('Доступ запрещен. Вы не являетесь администратором.');
   }
 
-  localStorage.setItem('token', data.token);
-  return { token: data.token, role: role.toLowerCase() };
+  setAuth(data.user, data.expiresAt);
+  return { role: role.toLowerCase() };
 };
 
-export const adminLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('active_restaurant_id');
-  localStorage.removeItem('active_restaurant_name');
-};
-
-export const getAdminToken = () => localStorage.getItem('token');
-
-export const decodeToken = () => {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
+export const adminLogout = async () => {
+  clearAuth(); // синхронно чистим клиентское состояние (до сетевого запроса)
   try {
-    let payloadStr = token;
-    if (token.includes('.')) {
-      payloadStr = token.split('.')[1];
-    }
-    const base64 = payloadStr.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
+    await apiRequest('/auth/logout', { method: 'POST' });
   } catch (err) {
-    console.error('[decodeToken] Error decoding token:', err);
-    return null;
+    console.warn('[auth] Запрос logout не прошёл:', err.message);
   }
 };
 
 export const isAdminAuthenticated = () => {
   const decoded = decodeToken();
   if (!decoded) return false;
-  
+
   const role = String(decoded.role).toUpperCase();
   const exp = decoded.exp;
-  
-  // Проверка на истечение токена (exp в JWT идет в секундах, а Date.now() в мс)
+
+  // exp в JWT идёт в секундах, а Date.now() в мс
   const isExpired = exp ? (exp * 1000 < Date.now()) : false;
-  
+
   return (role === 'ADMIN' || role === 'SUPER_ADMIN') && !isExpired;
 };
 
 export const isSuperAdminAuthenticated = () => {
   const decoded = decodeToken();
   if (!decoded) return false;
-  
+
   const role = String(decoded.role).toUpperCase();
   const exp = decoded.exp;
-  
+
   if (role !== 'SUPER_ADMIN') return false;
   if (exp && Date.now() >= exp * 1000) {
-    localStorage.removeItem('token');
+    clearAuth();
     return false;
   }
   return true;
@@ -215,6 +232,8 @@ export const superAdminDeleteRestaurant = (id) => {
 
 export const adminGetStats = () => apiRequest('/admin/stats');
 
+export const adminGetDashboard = () => apiRequest('/admin/dashboard');
+
 // ─── AI Generation ────────────────────────────────────────────────────────────
 
 export const aiGenerateCourse = ({ topic, lessonsCount, difficulty, category }) => {
@@ -312,4 +331,17 @@ export const adminConfirmParsedMenu = (menuData) => {
     body: { menuData },
   });
 };
+
+// ─── AI Pipeline (генерация Sales Guide + курс + тесты) ──────────────
+export const adminGetMenuAiStatus = () => apiRequest('/admin/menu/ai-status');
+
+export const adminRegenerateDishSalesGuide = (itemId) =>
+  apiRequest(`/admin/menu/items/${itemId}/regenerate-sales-guide`, { method: 'POST' });
+
+export const adminRegenerateMenuCourse = () =>
+  apiRequest('/admin/menu/regenerate-course', { method: 'POST' });
+
+// Полная генерация обучения по текущему меню (без загрузки PDF)
+export const adminGenerateTraining = () =>
+  apiRequest('/admin/menu/generate-training', { method: 'POST' });
 

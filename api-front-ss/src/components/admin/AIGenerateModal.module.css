@@ -3,7 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -19,16 +19,15 @@
 /* ─── Modal ──────────────────────────────────────────────────────── */
 .modal {
   position: relative;
-  background: #0f172a;
-  border-radius: 20px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
   width: min(540px, 95vw);
   max-height: 90vh;
   overflow-y: auto;
   padding: 2rem;
   box-shadow:
-    0 0 0 1px rgba(124, 58, 237, 0.3),
-    0 25px 60px rgba(0, 0, 0, 0.5),
-    0 0 80px rgba(124, 58, 237, 0.1);
+    0 0 0 1px var(--color-purple-soft),
+    var(--shadow-xl);
   animation: slideUp 0.35s ease;
 }
 
@@ -41,10 +40,10 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: #94a3b8;
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
   cursor: pointer;
   width: 36px;
   height: 36px;
@@ -54,8 +53,8 @@
   transition: all 0.2s;
 }
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-border-strong);
+  color: var(--color-text);
 }
 
 /* ─── Step Content ───────────────────────────────────────────────── */
@@ -77,14 +76,14 @@
 }
 
 .title {
-  color: #f1f5f9;
+  color: var(--color-text);
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   margin: 0 0 0.5rem;
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin: 0;
   line-height: 1.5;
@@ -98,43 +97,45 @@
 }
 
 .label {
-  color: #cbd5e1;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .topicInput {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
-  color: #f1f5f9;
+  color: var(--color-text);
   font-size: 0.95rem;
   resize: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   font-family: inherit;
 }
 .topicInput:focus {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  border-color: var(--color-purple);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-purple-soft);
 }
 .topicInput::placeholder {
-  color: #475569;
+  color: var(--color-text-muted);
 }
 
 .select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
   padding: 0.7rem 1rem;
-  color: #f1f5f9;
+  color: var(--color-text);
   font-size: 0.9rem;
   cursor: pointer;
+  font-family: inherit;
 }
 .select:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: var(--color-purple);
 }
 
 /* ─── Options Row ────────────────────────────────────────────────── */
@@ -157,25 +158,25 @@
 }
 
 .chip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
   padding: 0.45rem 0.85rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
 }
 .chip:hover {
-  border-color: rgba(124, 58, 237, 0.4);
-  color: #c4b5fd;
+  border-color: var(--color-purple);
+  color: var(--color-purple);
 }
 .chipActive {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(37, 99, 235, 0.2));
-  border-color: #7c3aed;
-  color: #c4b5fd;
-  font-weight: 600;
+  background: var(--color-purple-soft);
+  border-color: var(--color-purple);
+  color: var(--color-purple);
+  font-weight: var(--fw-semibold);
 }
 
 /* ─── Checkbox Row ───────────────────────────────────────────────── */
@@ -183,23 +184,23 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
   cursor: pointer;
 }
 .checkboxRow input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: #7c3aed;
+  accent-color: var(--color-purple);
 }
 
 /* ─── Error ──────────────────────────────────────────────────────── */
 .errorMsg {
-  color: #f87171;
+  color: var(--color-danger-hover);
   font-size: 0.85rem;
-  background: rgba(248, 113, 113, 0.1);
-  border: 1px solid rgba(248, 113, 113, 0.2);
-  border-radius: 10px;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border-soft);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 1rem;
   margin: 0;
 }
@@ -210,12 +211,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-primary));
   color: #fff;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: 0.9rem 1.5rem;
   cursor: pointer;
   transition: all 0.3s;
@@ -244,28 +245,28 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c3aed, #2563eb, #06b6d4);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-primary), #06b6d4);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: orbPulse 2s ease-in-out infinite;
-  box-shadow: 0 0 60px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 0 60px rgba(124, 58, 237, 0.35);
 }
 
 @keyframes orbPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(124, 58, 237, 0.4); }
-  50% { transform: scale(1.1); box-shadow: 0 0 100px rgba(124, 58, 237, 0.6); }
+  0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(124, 58, 237, 0.35); }
+  50% { transform: scale(1.1); box-shadow: 0 0 100px rgba(124, 58, 237, 0.5); }
 }
 
 .orbInner {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #0f172a;
+  background: var(--color-surface);
   animation: orbSpin 3s linear infinite;
   border: 3px solid transparent;
-  border-top-color: #c4b5fd;
-  border-right-color: #60a5fa;
+  border-top-color: var(--color-purple);
+  border-right-color: var(--color-primary);
 }
 
 @keyframes orbSpin {
@@ -274,9 +275,9 @@
 }
 
 .loadingText {
-  color: #e2e8f0;
+  color: var(--color-text);
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   animation: textFade 0.5s ease;
 }
 
@@ -288,7 +289,7 @@
 .progressBar {
   width: 70%;
   height: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-3);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -296,7 +297,7 @@
 .progressFill {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #7c3aed, #2563eb, #06b6d4);
+  background: linear-gradient(90deg, var(--color-purple), var(--color-primary), #06b6d4);
   border-radius: 4px;
   animation: progressMove 25s ease-out forwards;
   transform-origin: left;
@@ -308,16 +309,16 @@
 }
 
 .loadingHint {
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
   margin: 0;
 }
 
 /* ═══════════ STEP 3: PREVIEW ═══════════ */
 .previewCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -328,19 +329,19 @@
   width: 100%;
   height: 160px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .previewTitle {
-  color: #f1f5f9;
+  color: var(--color-text);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   margin: 0;
 }
 
 .previewDesc {
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
   line-height: 1.5;
   margin: 0;
@@ -355,9 +356,9 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #7c3aed;
+  color: var(--color-purple);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .lessonsList {
@@ -365,9 +366,9 @@
 }
 
 .lessonsListTitle {
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 0.5rem;
@@ -378,19 +379,19 @@
   align-items: center;
   gap: 0.7rem;
   padding: 0.45rem 0;
-  color: #cbd5e1;
+  color: var(--color-text-secondary);
   font-size: 0.88rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .lessonOrder {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(37, 99, 235, 0.2));
-  color: #c4b5fd;
+  background: var(--color-purple-soft);
+  color: var(--color-purple);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -410,20 +411,20 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
 }
 .restartBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-border-strong);
+  color: var(--color-text);
 }
 
 .saveBtn {
@@ -432,12 +433,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--color-success), #059669);
   color: #fff;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 0.75rem;
   cursor: pointer;
   transition: all 0.3s;

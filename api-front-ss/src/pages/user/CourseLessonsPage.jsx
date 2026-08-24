@@ -100,15 +100,15 @@ const CourseLessonsPage = () => {
                 <h4 className={styles.cardTitle}>{lesson.title}</h4>
                 <div className={styles.cardMeta}>
                   {lesson.is_completed ? (
-                    <><FiCheckCircle size={14} color="#10b981" /><span style={{color:'#10b981'}}>Пройден</span></>
+                    <><FiCheckCircle size={14} color="var(--color-success)" /><span style={{color:'var(--color-success)'}}>Пройден</span></>
                   ) : (
-                    <><FiClock size={14} color="#8E8E93" /><span>{lesson.type === 'video' ? '10 мин' : '15 мин чтения'}</span></>
+                    <><FiClock size={14} color="var(--color-text-muted)" /><span>{lesson.type === 'video' ? '10 мин' : '15 мин чтения'}</span></>
                   )}
                 </div>
               </div>
               <div className={styles.cardAction}>
                 {lesson.is_completed ? (
-                  <FiCheckCircle size={28} color="#10b981" />
+                  <FiCheckCircle size={28} color="var(--color-success)" />
                 ) : lesson.type === 'video' ? (
                   <FiPlayCircle size={28} />
                 ) : (
@@ -136,7 +136,7 @@ const CourseLessonsPage = () => {
                   <div className={styles.cardInfo}>
                     <h4 className={styles.cardTitle}>{test.title}</h4>
                     <div className={styles.cardMeta}>
-                      <FiStar size={14} color="#8E8E93" />
+                      <FiStar size={14} color="var(--color-text-muted)" />
                       <span>{test.score?.current || 0}/{test.score?.max || 0} баллов</span>
                     </div>
                   </div>

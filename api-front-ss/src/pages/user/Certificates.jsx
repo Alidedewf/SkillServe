@@ -4,6 +4,15 @@ import styles from './Certificates.module.css';
 import { FiArrowLeft, FiDownload, FiAward } from 'react-icons/fi';
 import { fetchArchivedCourses, fetchUserProfile } from '../../services/api';
 
+// Canvas 2D API не понимает CSS var(...), поэтому для отрисовки сертификата
+// используем литералы hex, синхронизированные со значениями токенов из tokens.css
+const CERT_COLORS = {
+  gold: '#d4af37',
+  goldSoft: '#fbf3d9',
+  silver: '#a8b0bb',
+  bronze: '#b3672b',
+};
+
 /* ── Генерация сертификата через Canvas ─────────────────── */
 const generateCertificate = (canvas, { userName, courseName, date, restaurantName }) => {
   const ctx = canvas.getContext('2d');
@@ -33,7 +42,7 @@ const generateCertificate = (canvas, { userName, courseName, date, restaurantNam
     const sealGrad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
     sealGrad.addColorStop(0, '#ffe066');
     sealGrad.addColorStop(0.3, '#f1c40f');
-    sealGrad.addColorStop(0.7, '#d4af37');
+    sealGrad.addColorStop(0.7, CERT_COLORS.gold);
     sealGrad.addColorStop(1, '#9a7b0c');
 
     // Внешние зубчики розетки
@@ -90,7 +99,7 @@ const generateCertificate = (canvas, { userName, courseName, date, restaurantNam
   // Внешняя золотая рамка
   const frameGrad = ctx.createLinearGradient(0, 0, W, H);
   frameGrad.addColorStop(0, '#ffd700'); // Золото
-  frameGrad.addColorStop(0.5, '#d4af37'); // Темное золото
+  frameGrad.addColorStop(0.5, CERT_COLORS.gold); // Темное золото
   frameGrad.addColorStop(1, '#f3e5ab'); // Светлое золото
   ctx.strokeStyle = frameGrad;
   ctx.lineWidth = 2.5;
@@ -284,7 +293,7 @@ const Certificates = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <button onClick={() => navigate(-1)} className={styles.backButton}>
-          <FiArrowLeft size={24} color="#fff" />
+          <FiArrowLeft size={24} color="var(--color-on-primary)" />
         </button>
         <h3 className={styles.title}>Сертификаты</h3>
       </div>

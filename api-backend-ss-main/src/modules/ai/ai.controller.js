@@ -7,7 +7,7 @@ const generateCourse = async (req, res) => {
   } catch (err) {
     if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
     console.error('[ai.generateCourse]', err);
-    res.status(500).json({ error: err.message || 'Ошибка генерации курса' });
+    res.status(500).json({ error: 'Ошибка генерации курса' });
   }
 };
 
@@ -18,7 +18,7 @@ const generateImage = async (req, res) => {
   } catch (err) {
     if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
     console.error('[ai.generateImage]', err);
-    res.status(500).json({ error: err.message || 'Ошибка подбора изображения' });
+    res.status(500).json({ error: 'Ошибка подбора изображения' });
   }
 };
 

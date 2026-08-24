@@ -30,4 +30,10 @@ router.delete('/items/:id', menuController.adminDeleteItem);
 router.post('/upload-pdf', upload.single('file'), menuController.adminUploadPdf);
 router.post('/confirm-parsed', menuController.adminConfirmParsedMenu);
 
+// AI Pipeline: статус генерации и повторная генерация
+router.get('/ai-status', menuController.getAiStatus);
+router.post('/generate-training', menuController.generateTraining);
+router.post('/items/:id/regenerate-sales-guide', menuController.regenerateSalesGuide);
+router.post('/regenerate-course', menuController.regenerateCourse);
+
 module.exports = router;

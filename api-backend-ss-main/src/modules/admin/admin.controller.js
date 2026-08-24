@@ -6,6 +6,11 @@ const getStats = asyncHandler(
   'Ошибка получения статистики'
 );
 
+const getDashboard = asyncHandler(
+  (req) => adminService.getDashboard(req.restaurantId),
+  'Ошибка получения дашборда'
+);
+
 const getCourses = asyncHandler(
   (req) => adminService.getCourses(req.restaurantId),
   'Ошибка получения курсов'
@@ -87,6 +92,7 @@ const grantAchievement = asyncHandler(
 
 module.exports = {
   getStats,
+  getDashboard,
   getCourses,
   getCourseById,
   createCourse,

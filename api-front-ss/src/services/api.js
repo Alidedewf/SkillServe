@@ -8,11 +8,21 @@ export const loginUser = async (email, password) => {
     });
 };
 
-export const fetchHomePage = async (token) => {
-    const headers = { 'Authorization': `Bearer ${token}` };
+// Выход: сбрасываем httpOnly-cookie на сервере и чистим claims в localStorage.
+export const logoutUser = async () => {
+    localStorage.removeItem('auth');
+    try {
+        await apiRequest('/auth/logout', { method: 'POST' });
+    } catch (err) {
+        console.warn('[auth] Запрос logout не прошёл:', err.message);
+    }
+};
+
+export const fetchHomePage = async () => {
+    // Авторизация идёт по httpOnly-cookie (credentials: 'include' в apiClient).
     const [user, courses] = await Promise.all([
-        apiRequest('/users/profile', { headers }),
-        apiRequest('/courses', { headers })
+        apiRequest('/users/profile'),
+        apiRequest('/courses')
     ]);
 
     return {

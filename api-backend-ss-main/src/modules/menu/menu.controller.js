@@ -102,6 +102,50 @@ const adminConfirmParsedMenu = async (req, res) => {
   }
 };
 
+const getAiStatus = async (req, res) => {
+  try {
+    const status = await menuService.getAiStatus(req.restaurantId);
+    res.json(status);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.getAiStatus]', err);
+    res.status(500).json({ error: 'Ошибка получения статуса генерации' });
+  }
+};
+
+const regenerateSalesGuide = async (req, res) => {
+  try {
+    const result = await menuService.regenerateSalesGuide(req.restaurantId, parseInt(req.params.id));
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.regenerateSalesGuide]', err);
+    res.status(500).json({ error: 'Ошибка перегенерации Sales Guide' });
+  }
+};
+
+const regenerateCourse = async (req, res) => {
+  try {
+    const result = await menuService.regenerateCourse(req.restaurantId);
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.regenerateCourse]', err);
+    res.status(500).json({ error: 'Ошибка перегенерации курса' });
+  }
+};
+
+const generateTraining = async (req, res) => {
+  try {
+    const result = await menuService.generateTraining(req.restaurantId);
+    res.json(result);
+  } catch (err) {
+    if (err.isOperational) return res.status(err.statusCode).json({ error: err.message });
+    console.error('[menu.generateTraining]', err);
+    res.status(500).json({ error: 'Ошибка запуска генерации' });
+  }
+};
+
 module.exports = {
   getMenu,
   adminGetCategories,
@@ -112,4 +156,8 @@ module.exports = {
   adminDeleteItem,
   adminUploadPdf,
   adminConfirmParsedMenu,
+  getAiStatus,
+  regenerateSalesGuide,
+  regenerateCourse,
+  generateTraining,
 };

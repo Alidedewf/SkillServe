@@ -4,6 +4,7 @@ import styles from './Login.module.css';
 import logo from '../../assets/images/skillserve2.svg';
 import { motion } from 'framer-motion';
 import { loginUser } from '../../services/api';
+import { setAuth } from '../../services/adminApi';
 import translations from '../../i18n/translations';
 
 const Login = () => {
@@ -31,7 +32,8 @@ const Login = () => {
 
     try {
       const data = await loginUser(email, password);
-      localStorage.setItem('token', data.token);
+      // Токен пришёл в httpOnly-cookie; в localStorage кладём только claims для гвардов.
+      setAuth(data.user, data.expiresAt);
 
       if (data.user.role === 'SUPER_ADMIN') {
         navigate('/superadmin');

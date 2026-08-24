@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
   const isExpired = decoded && decoded.exp ? (decoded.exp * 1000 < Date.now()) : true;
 
   if (!decoded || isExpired) {
-    localStorage.removeItem('token');
+    localStorage.removeItem('auth');
     return <Navigate to="/login" replace />;
   }
 

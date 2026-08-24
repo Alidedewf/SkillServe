@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { badRequest } = require('../../common/utils/errors');
+const { badRequest, AppError } = require('../../common/utils/errors');
 
 const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Базовый', category = 'Сервис' }) => {
   if (!topic || !topic.trim()) {
@@ -113,7 +113,7 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
 
   if (!result) {
     console.error('[AI] Все модели недоступны:', lastError?.message);
-    throw new Error('Сервис ИИ временно недоступен. Попробуйте через несколько минут.');
+    throw new AppError('Сервис ИИ временно недоступен. Попробуйте через несколько минут.', 503);
   }
 
   const responseText = result.response.text();
@@ -129,11 +129,11 @@ const generateCourseContent = async ({ topic, lessonsCount = 3, difficulty = 'Б
     courseData = JSON.parse(jsonStr);
   } catch (parseErr) {
     console.error('[AI] Ошибка парсинга JSON от Gemini:', parseErr.message);
-    throw new Error('ИИ вернул некорректный формат. Попробуйте ещё раз.');
+    throw new AppError('ИИ вернул некорректный формат. Попробуйте ещё раз.', 502);
   }
 
   if (!courseData.title || !courseData.lessons || !Array.isArray(courseData.lessons)) {
-    throw new Error('ИИ вернул неполные данные. Попробуйте ещё раз.');
+    throw new AppError('ИИ вернул неполные данные. Попробуйте ещё раз.', 502);
   }
 
   courseData.category = courseData.category || category;
@@ -244,12 +244,225 @@ ${text}
     return parsedData;
   } catch (error) {
     console.error('[AI Menu Parsing Error]:', error);
-    throw new Error('Не удалось распарсить меню с помощью ИИ. Возможно, текст слишком сложный или невалидный JSON.');
+    throw new AppError('Не удалось распарсить меню с помощью ИИ. Возможно, текст слишком сложный или невалидный JSON.', 502);
   }
+};
+
+// ─────────────────────────────────────────────────────────────────────
+// ОБЩИЕ ХЕЛПЕРЫ ДЛЯ MENU AI PIPELINE
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Вызов Gemini с фолбэком по моделям и ретраями на 503 (тот же подход,
+ * что и в generateCourseContent). Возвращает сырой текст ответа.
+ */
+const callGeminiText = async (prompt) => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new AppError('Сервис ИИ недоступен (не настроен ключ).', 503);
+  }
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const MODELS = ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 4000;
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  let lastError;
+  for (const modelName of MODELS) {
+    const model = genAI.getGenerativeModel({ model: modelName });
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      } catch (err) {
+        lastError = err;
+        if (err.status === 429) break; // лимит исчерпан — следующая модель
+        if (err.status === 503 && attempt < MAX_RETRIES) {
+          await sleep(RETRY_DELAY_MS);
+          continue;
+        }
+        break;
+      }
+    }
+  }
+  console.error('[AI] Все модели недоступны:', lastError?.message);
+  throw new AppError('Сервис ИИ временно недоступен.', 503);
+};
+
+/**
+ * Строгий парсинг JSON из ответа модели: срезает markdown-обёртки и мусор
+ * до первого [ или {. Бросает при невалидном JSON (для ретраев выше).
+ */
+const parseStrictJSON = (text) => {
+  let s = String(text || '').trim();
+  const fenced = s.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) s = fenced[1].trim();
+  const start = s.search(/[[{]/);
+  if (start > 0) s = s.slice(start);
+  const lastArr = s.lastIndexOf(']');
+  const lastObj = s.lastIndexOf('}');
+  const end = Math.max(lastArr, lastObj);
+  if (end !== -1) s = s.slice(0, end + 1);
+  return JSON.parse(s);
+};
+
+const chunk = (arr, size) => {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+/**
+ * Генерация Sales Guide для блюд. Строго по текущему меню — апселл/кросс-селл
+ * только из переданного списка блюд. Возвращает массив, выровненный по входу:
+ * { title, sellingPhrase, upsell, crossSell, premiumOffer, guestQuestions[],
+ *   guestAnswers[], keyAdvantages[], status: 'ok' | 'failed' }
+ */
+const generateSalesGuide = async (dishes) => {
+  const allTitles = dishes.map((d) => d.title);
+  const SIZE = 12;
+  const MAX_RETRIES = 2;
+  const results = new Array(dishes.length).fill(null);
+
+  const batches = chunk(dishes.map((d, i) => ({ ...d, _idx: i })), SIZE);
+
+  for (const batch of batches) {
+    const prompt = `Ты — эксперт по продажам в ресторане (HoReCa). Составь "шпаргалку продаж" (Sales Guide) для официанта по КАЖДОМУ блюду из списка ниже.
+
+КРИТИЧЕСКИ ВАЖНО:
+- Опирайся ТОЛЬКО на эти блюда. Для upsell/crossSell/premiumOffer ссылайся ИСКЛЮЧИТЕЛЬНО на блюда из общего меню ресторана (список ниже). НЕ придумывай блюда, которых нет в меню. Если подходящего блюда нет — верни пустую строку.
+- Ответ строго в формате JSON-массива, БЕЗ markdown, БЕЗ пояснений.
+
+Общее меню ресторана (допустимые блюда для рекомендаций): ${JSON.stringify(allTitles)}
+
+Блюда для генерации (верни массив в ТОМ ЖЕ порядке и количестве):
+${JSON.stringify(batch.map((d) => ({ title: d.title, description: d.description || '', price: d.price || '', category: d.category || '' })))}
+
+Структура каждого элемента массива:
+{
+  "title": "точное название блюда как во входе",
+  "sellingPhrase": "как вкусно презентовать блюдо гостю (1-2 предложения)",
+  "upsell": "что предложить дороже/больше из меню (или пустая строка)",
+  "crossSell": "что хорошо сочетается из меню (или пустая строка)",
+  "premiumOffer": "более премиальная альтернатива из меню (или пустая строка)",
+  "guestQuestions": ["частый вопрос гостя 1", "вопрос 2"],
+  "guestAnswers": ["ответ на вопрос 1", "ответ на вопрос 2"],
+  "keyAdvantages": ["преимущество 1", "преимущество 2", "преимущество 3"]
+}
+ВЕРНИ ТОЛЬКО ЧИСТЫЙ JSON-МАССИВ.`;
+
+    let parsed = null;
+    for (let attempt = 1; attempt <= MAX_RETRIES && !parsed; attempt++) {
+      try {
+        const text = await callGeminiText(prompt);
+        const arr = parseStrictJSON(text);
+        if (Array.isArray(arr) && arr.length > 0) parsed = arr;
+      } catch (err) {
+        console.warn(`[AI SalesGuide] batch попытка ${attempt} неуспешна:`, err.message);
+      }
+    }
+
+    batch.forEach((dish, j) => {
+      const g = parsed
+        ? parsed.find((x) => String(x.title).trim().toLowerCase() === dish.title.trim().toLowerCase()) || parsed[j]
+        : null;
+      results[dish._idx] = g
+        ? {
+            title: dish.title,
+            sellingPhrase: g.sellingPhrase || '',
+            upsell: g.upsell || '',
+            crossSell: g.crossSell || '',
+            premiumOffer: g.premiumOffer || '',
+            guestQuestions: Array.isArray(g.guestQuestions) ? g.guestQuestions : [],
+            guestAnswers: Array.isArray(g.guestAnswers) ? g.guestAnswers : [],
+            keyAdvantages: Array.isArray(g.keyAdvantages) ? g.keyAdvantages : [],
+            status: 'ok',
+          }
+        : { title: dish.title, status: 'failed' };
+    });
+  }
+
+  return results;
+};
+
+/**
+ * Генерация вопросов теста по блюдам (≥3 на блюдо), разные типы:
+ * SINGLE | MULTIPLE | TRUE_FALSE | SCENARIO. Возвращает плоский массив
+ * вопросов в формате createCourse: { content, type, answers:[{content,is_correct}] }.
+ * Блюда, по которым не удалось — пропускаются (изоляция ошибок).
+ */
+const generateMenuQuiz = async (dishes) => {
+  const SIZE = 8;
+  const MAX_RETRIES = 2;
+  const questions = [];
+  const batches = chunk(dishes, SIZE);
+
+  for (const batch of batches) {
+    const prompt = `Ты — тренер по продажам в ресторане. Составь тестовые вопросы для проверки официантов по КАЖДОМУ блюду ниже. Минимум 3 вопроса на блюдо.
+
+Используй разные типы вопросов:
+- "SINGLE" — один правильный ответ (4 варианта, 1 верный)
+- "MULTIPLE" — несколько правильных (4 варианта, 2-3 верных)
+- "TRUE_FALSE" — утверждение (2 варианта: Верно/Неверно, 1 верный)
+- "SCENARIO" — ситуация в зале + выбор действия (4 варианта, 1 верный)
+
+Вопросы — практические: что предложить к блюду (upsell/cross-sell), как презентовать, преимущества, ответ гостю.
+
+Ответ СТРОГО в JSON-массиве, БЕЗ markdown. Структура:
+[
+  {
+    "dishTitle": "точное название блюда",
+    "questions": [
+      {
+        "content": "текст вопроса",
+        "type": "SINGLE | MULTIPLE | TRUE_FALSE | SCENARIO",
+        "answers": [ { "content": "вариант", "is_correct": true|false } ]
+      }
+    ]
+  }
+]
+
+Блюда (с подсказками из Sales Guide):
+${JSON.stringify(batch.map((d) => ({ title: d.title, description: d.description || '', guide: d.guide || null })))}
+ВЕРНИ ТОЛЬКО ЧИСТЫЙ JSON-МАССИВ.`;
+
+    let parsed = null;
+    for (let attempt = 1; attempt <= MAX_RETRIES && !parsed; attempt++) {
+      try {
+        const text = await callGeminiText(prompt);
+        const arr = parseStrictJSON(text);
+        if (Array.isArray(arr) && arr.length > 0) parsed = arr;
+      } catch (err) {
+        console.warn(`[AI Quiz] batch попытка ${attempt} неуспешна:`, err.message);
+      }
+    }
+    if (!parsed) continue;
+
+    for (const dishBlock of parsed) {
+      const qs = Array.isArray(dishBlock.questions) ? dishBlock.questions : [];
+      for (const q of qs) {
+        const answers = Array.isArray(q.answers)
+          ? q.answers
+              .filter((a) => a && a.content)
+              .map((a) => ({ content: String(a.content), is_correct: !!a.is_correct }))
+          : [];
+        const correctCount = answers.filter((a) => a.is_correct).length;
+        // Валидация: минимум 2 варианта и хотя бы 1 верный
+        if (!q.content || answers.length < 2 || correctCount < 1) continue;
+        const type = ['SINGLE', 'MULTIPLE', 'TRUE_FALSE', 'SCENARIO'].includes(q.type) ? q.type : 'SINGLE';
+        questions.push({ content: String(q.content), type, answers });
+      }
+    }
+  }
+
+  return questions;
 };
 
 module.exports = {
   generateCourseContent,
   generateCoverImage,
   parseMenuTextToJSON,
+  callGeminiText,
+  parseStrictJSON,
+  generateSalesGuide,
+  generateMenuQuiz,
 };

@@ -8,10 +8,10 @@ const NotFound = () => {
   const navigate = useNavigate();
   const lang = localStorage.getItem('lang') || 'ru';
   const t = translations[lang] || translations.ru;
-  const token = localStorage.getItem('token');
+  const isAuthed = !!localStorage.getItem('auth');
 
   const handleBackClick = () => {
-    if (token) {
+    if (isAuthed) {
       if (window.history.state && window.history.state.idx > 0) {
         navigate(-1);
       } else {
@@ -22,7 +22,7 @@ const NotFound = () => {
     }
   };
 
-  const buttonText = token ? t.goHome : (lang === 'kz' ? 'Кіру' : 'Войти');
+  const buttonText = isAuthed ? t.goHome : (lang === 'kz' ? 'Кіру' : 'Войти');
 
   return (
     <div className={styles.container}>

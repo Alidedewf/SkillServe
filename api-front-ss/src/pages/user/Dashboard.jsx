@@ -5,22 +5,20 @@ import CourseCard from '../../components/user/CourseCard';
 import { fetchHomePage } from '../../services/api';
 import styles from './Dashboard.module.css';
 import avatar from '../../assets/images/default-avatar.svg';
-import { FiBell } from 'react-icons/fi';
+import { FiBell, FiBook, FiInfo } from 'react-icons/fi';
 import illustration from '../../assets/images/illustration.svg';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [allCourses, setAllCourses] = useState([]);
   const [error, setError] = useState('');
-  const [slide, setSlide] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Токен отсутствует');
-        const data = await fetchHomePage(token);
+        // Авторизация по httpOnly-cookie; маршрут уже защищён ProtectedRoute.
+        const data = await fetchHomePage();
         setUser({
           name: data.user.name,
           progress: data.user.progress.percentage,
@@ -36,59 +34,17 @@ const Dashboard = () => {
     loadData();
   }, []);
 
-  // Автопрокрутка карусели
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSlide(prev => (prev + 1) % 5);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
+  // Курс, который сотрудник реально проходит сейчас (не только "почти готов") —
+  // берём с наибольшим прогрессом среди незавершённых, это и есть следующий шаг.
+  const activeCourse = allCourses
+    .filter(c => c.progress > 0 && c.progress < 100)
+    .sort((a, b) => b.progress - a.progress)[0];
 
-  const nearlyDoneCourse = allCourses.find(c => c.progress > 85 && c.progress < 100);
-  const totalMin = 60;
-  const doneMin = user ? Math.round((user.progress / 100) * totalMin) : 0;
-
-  // Слайды карусели
-  const slides = [
-    // Слайд 0: Курс в процессе (если есть)
-    nearlyDoneCourse ? {
-      type: 'course',
-      data: nearlyDoneCourse,
-    } : {
-      type: 'tip',
-      emoji: '📚',
-      label: 'Совет дня',
-      text: 'Учись по 15 минут в день — и через месяц ты станешь экспертом!',
-    },
-    // Слайд 1: Совет дня
-    {
-      type: 'tip',
-      emoji: '💡',
-      label: 'Лайфхак',
-      text: 'Повторяй материал через 24 часа после изучения. Запоминаемость возрастает в 2 раза.',
-    },
-    // Слайд 2: Достижение
-    {
-      type: 'achievement',
-      emoji: '🏆',
-      label: 'Твоё достижение',
-      text: 'Ты прошёл 3 курса за этот месяц. Отличный результат!',
-    },
-    // Слайд 3: Напоминание
-    {
-      type: 'reminder',
-      emoji: '⏰',
-      label: 'Напоминание',
-      text: 'Не забудь пройти итоговый тест по стандартам сервировки.',
-    },
-    // Слайд 4: Рейтинг
-    {
-      type: 'rating',
-      emoji: '📊',
-      label: 'Рейтинг команды',
-      text: 'Ты на 3 месте среди всех сотрудников. До 2 места — ещё 2 курса!',
-    },
-  ];
+  // Статичная подсказка на случай, если продолжать нечего (курс ещё не начат).
+  // Без авто-ротации: она никогда не должна отвлекать от кнопки "Продолжить".
+  const dayTip = new Date().getDate() % 2 === 0
+    ? { icon: FiBook, label: 'Совет дня', text: 'Учись по 15 минут в день — и через месяц ты станешь экспертом!' }
+    : { icon: FiInfo, label: 'Лайфхак', text: 'Повторяй материал через 24 часа после изучения. Запоминаемость возрастает в 2 раза.' };
 
   return (
     <div className={styles.dashboard}>
@@ -111,74 +67,66 @@ const Dashboard = () => {
           )}
         </div>
         <button className={styles.notificationButton} onClick={() => navigate('/notifications')}>
-          <FiBell size={24} color="#fff" />
+          <FiBell size={24} color="var(--color-on-primary)" />
         </button>
       </div>
 
       {/* ── КОНТЕНТ ─────────────────────────────── */}
       <div className={styles.content}>
 
-        {/* Умный Банер / Карусель */}
+        {/* Приоритетный блок: продолжить обучение (статично, без ротации —
+            это единственное реальное действие на экране, оно не должно
+            конкурировать за внимание со случайными подсказками). */}
         <div className={styles.banner}>
           <img src={illustration} alt="Illustration" className={styles.bannerIllustration} />
 
-          {/* Контент текущего слайда */}
           <div className={styles.slideContent}>
-            {slides[slide].type === 'course' && (
+            {activeCourse ? (
               <div
                 className={styles.bannerCourseCard}
-                onClick={() => navigate(`/course/${slides[slide].data.id}`)}
+                onClick={() => navigate(`/course/${activeCourse.id}`)}
               >
-                {slides[slide].data.image && (
+                {activeCourse.image && (
                   <div className={styles.bannerCourseImg}>
-                    <img
-                      src={slides[slide].data.image}
-                      alt={slides[slide].data.title}
-                    />
+                    <img src={activeCourse.image} alt={activeCourse.title} />
                   </div>
                 )}
                 <div className={styles.bannerCourseInfo}>
-                  <p className={styles.bannerCourseTitle}>{slides[slide].data.title}</p>
-                  <span className={styles.bannerCoursePct}>{slides[slide].data.progress}%</span>
+                  <p className={styles.bannerCourseTitle}>{activeCourse.title}</p>
+                  <span className={styles.bannerCoursePct}>{activeCourse.progress}%</span>
                   <div className={styles.bannerCourseBar}>
-                    <div className={styles.bannerCourseFill} style={{ width: `${slides[slide].data.progress}%` }} />
+                    <div className={styles.bannerCourseFill} style={{ width: `${activeCourse.progress}%` }} />
                   </div>
                   <button className={styles.bannerContinueBtn}>
                     Продолжить учиться <span className={styles.playIcon}>▶</span>
                   </button>
                 </div>
               </div>
-            )}
-            {slides[slide].type !== 'course' && (
-              <div className={styles.infoSlide}>
-                <div className={styles.infoSlideEmoji}>{slides[slide].emoji}</div>
-                <div>
-                  <span className={styles.infoSlideLabel}>{slides[slide].label}</span>
-                  <p className={styles.infoSlideText}>{slides[slide].text}</p>
+            ) : (() => {
+              const TipIcon = dayTip.icon;
+              return (
+                <div className={styles.infoSlide}>
+                  <div className={styles.infoSlideEmoji}>
+                    <TipIcon size={22} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <span className={styles.infoSlideLabel}>{dayTip.label}</span>
+                    <p className={styles.infoSlideText}>{dayTip.text}</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Кликабельные точки пагинации */}
-          <div className={styles.paginationDots}>
-            {slides.map((_, i) => (
-              <span
-                key={i}
-                className={i === slide ? styles.dotActive : styles.dot}
-                onClick={() => setSlide(i)}
-              />
-            ))}
+              );
+            })()}
           </div>
         </div>
 
-        {/* Прогресс-карточка (ПОД банером) */}
+        {/* Прогресс-карточка (ПОД банером) — реальный % по всем курсам,
+            без выдуманных "минут из 60" */}
         {user && (
           <div className={styles.progressCard}>
-            <span className={styles.progressLabel}>Прогресс</span>
+            <span className={styles.progressLabel}>Прогресс обучения</span>
             <div className={styles.progressTime}>
-              <span className={styles.progressDone}>{doneMin}мин</span>
-              <span className={styles.progressTotal}>/ {totalMin}мин</span>
+              <span className={styles.progressDone}>{user.progress}%</span>
+              <span className={styles.progressTotal}>выполнено</span>
             </div>
             <div className={styles.progressBar}>
               <div className={styles.progressFill} style={{ width: `${user.progress}%` }} />

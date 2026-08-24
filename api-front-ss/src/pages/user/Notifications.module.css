@@ -1,5 +1,5 @@
 .container {
-    background: linear-gradient(180deg, #006ffd 0%, #fff 100%);
+    background: linear-gradient(180deg, var(--color-primary) 0%, #fff 100%);
     min-height: 100vh;
     padding: 20px;
   }
@@ -42,13 +42,13 @@
   
   .notificationBody {
     font-size: 14px;
-    color: #71727a;
+    color: var(--color-text-secondary);
   }
   
   .notificationBody span {
     display: block;
     margin-top: 10px;
     font-size: 12px;
-    color: #b0b0b0;
+    color: var(--color-text-muted);
   }
   

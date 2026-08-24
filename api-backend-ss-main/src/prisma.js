@@ -11,40 +11,50 @@ const prisma = new PrismaClient({
   ],
 });
 
-// Фильтруем шум от Neon: E57P01 = idle-соединение убито — это ожидаемо,
-// Prisma сама переподключится при следующем запросе.
+// Гасим шум: "terminating connection" — БД закрыла idle-соединение,
+// Prisma переподключится при следующем запросе.
 prisma.$on('error', (e) => {
-  if (e.message?.includes('terminating connection')) return; // Neon idle disconnect — игнорируем
+  if (e.message?.includes('terminating connection')) return;
   console.error('[Prisma Error]', e.message);
 });
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-// Обработка повторных попыток при разрыве соединения Neon
+// Разрыв соединения с БД (перезапуск контейнера БД, таймаут пула и т.п.)
+const isConnectionLost = (err) =>
+  err?.code === 'P1001' || // Can't reach database server
+  err?.code === 'P1008' || // Operations timed out
+  err?.code === 'P1017' || // Server closed the connection
+  err?.code === 'P2024' || // Connection pool timeout
+  err?.message?.includes('terminating connection') ||
+  err?.message?.includes('Connection pool timeout') ||
+  err?.message?.includes('kind: Closed');
+
+// Повторные попытки при кратковременном разрыве соединения
+// (например, БД перезапустилась) — с нарастающей задержкой.
 prisma.$use(async (params, next) => {
-  const start = Date.now();
-  try {
-    return await next(params);
-  } catch (err) {
-    const duration = Date.now() - start;
-    console.error(`❌ [Prisma ERROR] ${params.model}.${params.action} — ${duration}ms:`, err.message);
-
-    const isNeonDisconnect =
-      err?.message?.includes('terminating connection') ||
-      err?.message?.includes('Connection pool timeout') ||
-      err?.code === 'P1001' ||
-      err?.code === 'P1008' ||
-      err?.code === 'P2024';
-
-    if (isNeonDisconnect) {
-      console.warn('[Prisma] Neon оборвал соединение, повторяем запрос...');
+  const MAX_RETRIES = 4;
+  let lastErr;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
       return await next(params);
+    } catch (err) {
+      lastErr = err;
+      if (!isConnectionLost(err) || attempt === MAX_RETRIES) {
+        if (isConnectionLost(err)) {
+          console.error(`❌ [Prisma] БД недоступна после ${attempt + 1} попыток (${params.model}.${params.action}): ${err.code || err.message}`);
+        }
+        throw err;
+      }
+      const delay = 300 * Math.pow(2, attempt); // 300, 600, 1200, 2400ms
+      console.warn(`[Prisma] Соединение оборвано (${err.code || 'closed'}), повтор ${attempt + 1}/${MAX_RETRIES} через ${delay}ms — ${params.model}.${params.action}`);
+      await sleep(delay);
     }
-
-    throw err;
   }
+  throw lastErr;
 });
 
-// Прогреваем соединение с Neon при старте сервера
+// Прогреваем соединение при старте сервера
 prisma.$connect()
   .then(() => console.log('✅ Подключение к БД установлено'))
   .catch((err) => console.error('❌ Ошибка подключения к БД:', err.message));
